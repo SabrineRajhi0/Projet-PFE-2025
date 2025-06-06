@@ -1,0 +1,614 @@
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  width: 300px;
+}
+
+.modal-content h3 {
+  color: #34495e;
+  margin-bottom: 15px;
+}
+
+.modal-content p {
+  color: #7f8c8d;
+  margin-bottom: 20px;
+}
+
+.bouton-confirmer {
+  padding: 10px 20px;
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+  margin-right: 10px;
+  transition: background-color 0.3s ease;
+}
+
+.bouton-confirmer:hover {
+  background-color: #c0392b;
+}
+
+.bouton-annuler {
+  padding: 10px 20px;
+  background-color: #7f8c8d;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
+}
+
+.bouton-annuler:hover {
+  background-color: #6c7a89;
+}
+/* styles.css */
+
+/* Style général */
+.tableau-admin {
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 1rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.chargement {
+  text-align: center;
+  font-size: 1.2rem;
+  color: #4b5563;
+  padding: 2rem;
+}
+
+.message-erreur {
+  background-color: #fee2e2;
+  color: #dc2626;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin: 1rem 0;
+  border: 1px solid #fca5a5;
+}
+
+/* Tableau */
+.tableau-utilisateurs {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 2rem 0;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+}
+
+.tableau-utilisateurs th,
+.tableau-utilisateurs td {
+  padding: 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid #56698e;
+}
+
+
+/* Tableau - Ajoutez ces règles APRÈS le style existant de .tableau-utilisateurs th */
+.tableau-utilisateurs th {
+  background-color: #1f2937;
+  color: white;
+  font-weight: 600;
+  cursor: pointer; /* Ajout */
+  transition: background-color 0.3s ease; /* Ajout */
+  position: relative; /* Ajout */
+}
+
+/* Nouveaux styles à ajouter */
+.tableau-utilisateurs th:active {
+  background-color: #111827 !important;
+}
+
+.tableau-utilisateurs th.sorted {
+  background-color: #374151;
+}
+
+.tableau-utilisateurs th.sorted::after {
+  content: " 🔽"; /* ou " 🔼" selon l'ordre */
+  position: absolute;
+  right: 10px;
+}
+
+
+.tableau-utilisateurs tr:hover {
+  background-color: #374151;;
+}
+
+/* Formulaires */
+.conteneur-formulaire {
+  background-color: #f3f4f6;
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  margin: 1rem 0;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.conteneur-formulaire div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.conteneur-formulaire label {
+  font-weight: 500;
+  color: #374151;
+}
+
+.conteneur-formulaire input,
+.conteneur-formulaire select {
+  padding: 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  width: 100%;
+}
+
+/* Boutons généraux */
+button {
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Boutons spécifiques */
+.bouton-deconnexion {
+  background-color: #6b7280;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  border: none;
+  cursor: pointer;
+  float: right;
+}
+
+.bouton-deconnexion:hover {
+  background-color: #4b5563;
+}
+
+.bouton-activer { background-color: #10b981; }
+.bouton-bloquer { background-color: #f59e0b; }
+.bouton-rejeter { background-color: #ef4444; }
+.bouton-debloquer { background-color: #3b82f6; }
+.bouton-modifier { background-color: #8b5cf6; }
+.bouton-supprimer { background-color: #64748b; }
+
+/* Style commun des boutons d'action */
+.bouton-activer,
+.bouton-bloquer,
+.bouton-rejeter,
+.bouton-debloquer,
+.bouton-modifier,
+.bouton-supprimer {
+  color: white;
+  padding: 0.375rem 0.75rem;
+  margin: 0.125rem;
+  border-radius: 0.25rem;
+  border: none;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+/* Hover states */
+.bouton-activer:hover { background-color: #059669; }
+.bouton-bloquer:hover { background-color: #d97706; }
+.bouton-rejeter:hover { background-color: #dc2626; }
+.bouton-debloquer:hover { background-color: #2563eb; }
+.bouton-modifier:hover { background-color: #7c3aed; }
+.bouton-supprimer:hover { background-color: #475569; }
+
+/* Modales */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 0.5rem;
+  width: 90%;
+  max-width: 500px;
+}
+
+.modal-content h3 {
+  margin-top: 0;
+  color: #1f2937;
+}
+
+.modal-content p {
+  margin: 1rem 0;
+  color: #4b5563;
+}
+
+.modal-input {
+  width: 100%;
+  padding: 0.5rem;
+  margin: 0.5rem 0;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+}
+
+/* Boutons de confirmation */
+.bouton-confirmer {
+  background-color: #3b82f6;
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  margin-right: 0.5rem;
+}
+
+.bouton-confirmer:hover {
+  background-color: #2563eb;
+}
+
+.bouton-annuler {
+  background-color: #6b7280;
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 0.25rem;
+  cursor: pointer;
+}
+
+.bouton-annuler:hover {
+  background-color: #4b5563;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .conteneur-formulaire {
+    grid-template-columns: 1fr;
+  }
+  
+  .tableau-utilisateurs {
+    display: block;
+    overflow-x: auto;
+  }
+}
+
+
+
+/* Style général */
+.tableau-admin {
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 1rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.chargement {
+  text-align: center;
+  font-size: 1.2rem;
+  color: #4b5563;
+  padding: 2rem;
+}
+
+.message-erreur {
+  background-color: #fee2e2;
+  color: #dc2626;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin: 1rem 0;
+  border: 1px solid #fca5a5;
+}
+
+/* Tableau */
+.tableau-utilisateurs {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 2rem 0;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+}
+
+.tableau-utilisateurs th,
+.tableau-utilisateurs td {
+  padding: 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+/* Styles modifiés pour les en-têtes */
+.tableau-utilisateurs th {
+  background-color: #1f2937;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.tableau-utilisateurs th:active {
+  background-color: #111827 !important;
+  transform: scale(0.98);
+}
+
+.tableau-utilisateurs th.sorted {
+  background-color: #374151;
+}
+
+.tableau-utilisateurs th.sorted::after {
+  content: "▼";
+  margin-left: 8px;
+  font-size: 0.8em;
+  color: #93c5fd;
+}
+
+.tableau-utilisateurs th:hover {
+  background-color: #2d3748;
+}
+
+.tableau-utilisateurs tr:hover {
+  background-color: #f9fafb;
+}
+
+/* Formulaires */
+.conteneur-formulaire {
+  background-color: #f3f4f6;
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  margin: 1rem 0;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.conteneur-formulaire div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.conteneur-formulaire label {
+  font-weight: 500;
+  color: #374151;
+}
+
+.conteneur-formulaire input,
+.conteneur-formulaire select {
+  padding: 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  width: 100%;
+}
+
+/* Boutons généraux */
+button {
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Boutons spécifiques */
+.bouton-deconnexion {
+  background-color: #6b7280;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  border: none;
+  cursor: pointer;
+  float: right;
+}
+
+.bouton-deconnexion:hover {
+  background-color: #4b5563;
+}
+
+.bouton-activer { background-color: #10b981; }
+.bouton-bloquer { background-color: #f59e0b; }
+.bouton-rejeter { background-color: #ef4444; }
+.bouton-debloquer { background-color: #3b82f6; }
+.bouton-modifier { background-color: #8b5cf6; }
+.bouton-supprimer { background-color: #64748b; }
+
+/* Style commun des boutons d'action */
+.bouton-activer,
+.bouton-bloquer,
+.bouton-rejeter,
+.bouton-debloquer,
+.bouton-modifier,
+.bouton-supprimer {
+  color: white;
+  padding: 0.375rem 0.75rem;
+  margin: 0.125rem;
+  border-radius: 0.25rem;
+  border: none;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+/* Hover states */
+.bouton-activer:hover { background-color: #059669; }
+.bouton-bloquer:hover { background-color: #d97706; }
+.bouton-rejeter:hover { background-color: #dc2626; }
+.bouton-debloquer:hover { background-color: #2563eb; }
+.bouton-modifier:hover { background-color: #7c3aed; }
+.bouton-supprimer:hover { background-color: #475569; }
+
+/* Modales */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 0.5rem;
+  width: 90%;
+  max-width: 500px;
+}
+
+.modal-content h3 {
+  margin-top: 0;
+  color: #1f2937;
+}
+
+.modal-content p {
+  margin: 1rem 0;
+  color: #4b5563;
+}
+
+.modal-input {
+  width: 100%;
+  padding: 0.5rem;
+  margin: 0.5rem 0;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+}
+
+/* Boutons de confirmation */
+.bouton-confirmer {
+  background-color: #3b82f6;
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  margin-right: 0.5rem;
+}
+
+.bouton-confirmer:hover {
+  background-color: #2563eb;
+}
+
+.bouton-annuler {
+  background-color: #6b7280;
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 0.25rem;
+  cursor: pointer;
+}
+
+.bouton-annuler:hover {
+  background-color: #4b5563;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .conteneur-formulaire {
+    grid-template-columns: 1fr;
+  }
+  
+  .tableau-utilisateurs {
+    display: block;
+    overflow-x: auto;
+  }
+}
+
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 5px;
+  width: 400px;
+  max-width: 90%;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.modal-content h3 {
+  margin-top: 0;
+}
+
+.modal-content textarea {
+  width: 100%;
+  height: 100px;
+  margin-bottom: 15px;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  resize: vertical;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.bouton-confirmer,
+.bouton-annuler {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.bouton-confirmer {
+  background-color: #dc3545; /* Red for block/reject, green for unblock */
+  color: white;
+}
+
+.bouton-confirmer:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.bouton-annuler {
+  background-color: #6c757d;
+  color: white;
+}
+
+/* Optional: Style for unblock button confirmation */
+.modal-unblock .bouton-confirmer {
+  background-color: #28a745; /* Green for unblock */
+}
