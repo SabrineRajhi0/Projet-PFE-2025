@@ -3,6 +3,8 @@ package GestionCours.backend.springboot.Entity;
 
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -12,8 +14,8 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "type_element")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class TypeElement {
-
     public enum SupportedTypes {
         IMAGE, PDF,  DOCUMENT_WORD
     }

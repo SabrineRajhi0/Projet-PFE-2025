@@ -65,11 +65,10 @@ public class FileUploadConfig implements WebMvcConfigurer {
         }
     }
 
+
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/uploads/**")
-                .addResourceLocations("file:" + elementsDir + "/")
-                .setCachePeriod(3600)
-                .resourceChain(true);
+                .addResourceLocations("classpath:/uploads/");
     }
 } 

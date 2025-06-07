@@ -18,6 +18,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 
 import java.util.Arrays;
 import java.util.List;
@@ -26,6 +27,7 @@ import java.util.List;
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
+
 
     private final JwtUtils jwtUtils;
     private final UserDetailsService userDetailsService;
@@ -70,6 +72,8 @@ public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Excepti
             .requestMatchers("/*").permitAll() // 👈 AJOUTE CETTE LIGNE
             .requestMatchers("/api/element-cours/addElementCours").hasAnyRole("ADMIN","APPRENANT", "ENSEIGNANT")
              .requestMatchers("/users/**").permitAll()
+ .requestMatchers("/api/element/v1/getByEspaceCoursId/**").permitAll()
+  .requestMatchers("api/type-element/**").permitAll()
 
             		.requestMatchers("/auth/validate").authenticated()
 
@@ -132,4 +136,5 @@ CorsConfigurationSource corsConfigurationSource() {
     source.registerCorsConfiguration("/**", configuration);
     return source;
 }
+
 }

@@ -25,7 +25,6 @@ public class ElementDTO {
 	
 	public ElementDTO(String description, String cheminFichier, String typeElement, int ordreEC, boolean visibleEC,
 			String dateLimite, Long idEspaceCours) {
-		
 		this.description = description;
 		this.cheminFichier = cheminFichier;
 		this.typeElement = typeElement;
