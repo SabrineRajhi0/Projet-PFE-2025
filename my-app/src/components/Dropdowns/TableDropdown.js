@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from "react";
-import { createPopper } from "@popperjs/core";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Swal from "sweetalert2";
@@ -23,14 +22,7 @@ const TableDropdown = ({ coursItem, showOnlyAfficher = false, onEdit }) => {
   };
 
   useEffect(() => {
-    let popperInstance;
-    if (
-      dropdownPopoverShow &&
-      btnDropdownRef.current &&
-      popoverDropdownRef.current
-    ) {
-      // We're using inline styles instead of Popper.js to position the dropdown
-      // Only update the popover ref to track clicks
+    if (dropdownPopoverShow) {
       document.addEventListener("mousedown", handleClickOutside);
     }
     return () => {
@@ -40,25 +32,24 @@ const TableDropdown = ({ coursItem, showOnlyAfficher = false, onEdit }) => {
 
   const fetchElementByIdElt = async (id_elt) => {
     try {
-      const token = localStorage.getItem("accessToken");
-      if (!token) throw new Error("Token manquant");
-
+      // This is a public endpoint, no token needed
       const response = await axios.get(
-        `http://localhost:8087/api/element/v1/getByEspaceCoursId/${id_elt}`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        `http://localhost:8087/api/element/v1/getByEspaceCoursId/${id_elt}`
       );
       return response.data;
     } catch (err) {
       let message;
       const status = err.response?.status;
-      if (status === 400) {
-        message = "Requête invalide pour l'élément du cours.";
-      } else if (status === 404) {
+      const errorMessage = err.response?.data?.message;
+      
+      if (status === 404) {
         message = "Aucun élément trouvé pour ce cours.";
-      } else if (status === 401) {
-        message = "Accès non autorisé. Veuillez vous reconnecter.";
+      } else if (status === 403) {
+        message = "Vous n'avez pas accès à cet élément de cours.";
+      } else if (status === 500) {
+        message = "Une erreur serveur s'est produite lors de la récupération de l'élément.";
       } else {
-        message = err.message || "Erreur lors de la récupération de l'élément.";
+        message = errorMessage || err.message || "Erreur lors de la récupération de l'élément.";
       }
       throw new Error(message);
     }
@@ -72,13 +63,20 @@ const TableDropdown = ({ coursItem, showOnlyAfficher = false, onEdit }) => {
         const fileUrl = `http://localhost:8087/${element.cheminElt}`;
         window.open(fileUrl, "_blank");
       } else {
-        Swal.fire(
-          "Fichier introuvable",
-          "Le fichier est manquant pour cet élément.",
-          "warning"
-        );
+        Swal.fire({
+          icon: 'warning',
+          title: 'Fichier introuvable',
+          text: 'Le fichier est manquant pour cet élément.',
+          confirmButtonColor: '#3085d6'
+        });
       }
     } catch (err) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Erreur',
+        text: err.message,
+        confirmButtonColor: '#3085d6'
+      });
       Swal.fire("Erreur", err.message, "error");
     } finally {
       setIsLoading(false);

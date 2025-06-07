@@ -21,6 +21,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Enseignant from "views/Enseignant/index.js";
 import Apprenant from "views/Apprenant/index.js";
+import ViewCours from "views/Apprenant/ViewCours.js";
 
 const root = createRoot(document.getElementById("root"));
 root.render(
@@ -34,6 +35,7 @@ root.render(
         {/* standalone dashboards for Enseignant & Apprenant */}
         <Route path="/enseignant" element={<Enseignant />} />
         <Route path="/apprenant" element={<Apprenant />} />
+        <Route path="/apprenant/cours/:id" element={<ViewCours />} />
 
         {/* add routes without layouts */}
         <Route path="/landing" element={<Landing />} />

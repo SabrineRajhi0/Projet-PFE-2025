@@ -13,13 +13,13 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/element/v1")
+@CrossOrigin(origins = "http://localhost:3000")
 public class ElementController1 {
 
     @Autowired
     private ElementServiceInterface1 elementService;
 
-    // 👇 Méthode demandée
-    @PreAuthorize("hasAnyRole('APPRENANT', 'ENSEIGNANT', 'ADMIN')")
+    // Public endpoint for getting first element by espace cours ID
     @GetMapping("/getByEspaceCoursId/{id}")
     public ResponseEntity<?> getFirstElementByEspaceCoursId(@PathVariable Long id) {
 

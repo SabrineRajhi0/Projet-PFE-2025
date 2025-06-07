@@ -8,12 +8,39 @@ const UPLOADS_BASE_URL = 'http://localhost:8087/uploads';
 // Helper pour gérer l'authentification
 const getAuthConfig = (isMultipart = false) => {
   const token = localStorage.getItem('accessToken');
+  if (!token) {
+    throw new Error('No access token available');
+  }
+  
   return {
     headers: {
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      Authorization: `Bearer ${token}`,
       ...(isMultipart ? {} : { 'Content-Type': 'application/json' })
     }
   };
+};
+
+// Helper pour gérer les erreurs API
+const handleApiError = (error, customMessage) => {
+  console.error('API Error:', {
+    status: error.response?.status,
+    data: error.response?.data,
+    message: error.message
+  });
+
+  if (error.response?.status === 401) {
+    toast.error('Session expirée. Veuillez vous reconnecter.');
+    // Redirect handling should be done at component level
+    throw new Error('Session expired');
+  }
+
+  if (error.response?.status === 403) {
+    toast.error('Accès non autorisé. Veuillez vérifier vos permissions.');
+    throw new Error('Unauthorized access');
+  }
+
+  toast.error(error.response?.data?.message || customMessage);
+  throw error;
 };
 
 // Service pour les éléments de cours
@@ -43,19 +70,7 @@ export const elementCoursService = {
       
       return data;
     } catch (error) {
-      console.error('API Error Details:', {
-        status: error.response?.status,
-        data: error.response?.data,
-        message: error.message,
-        config: error.config
-      });
-      
-      if (error.response?.status === 401) {
-        toast.error('Session expirée. Veuillez vous reconnecter.');
-      } else {
-        toast.error(`Erreur lors de la récupération des éléments de cours: ${error.response?.data?.message || error.message}`);
-      }
-      throw error;
+      handleApiError(error, 'Erreur lors de la récupération des éléments de cours');
     }
   },
 
@@ -237,26 +252,6 @@ export const elementCoursService = {
       throw error;
     }
   }
-};
-
-// Gestion des erreurs API
-const handleApiError = (error, defaultMessage) => {
-  let errorMessage = defaultMessage;
-  
-  if (error.response) {
-    if (error.response.status === 401) {
-      errorMessage = 'Authentification requise - Veuillez vous reconnecter';
-      // Redirection vers la page de login
-      window.location.href = '/login';
-    } else if (error.response.status === 403) {
-      errorMessage = 'Accès refusé - Vous n\'avez pas les permissions nécessaires';
-    } else if (error.response.data && error.response.data.message) {
-      errorMessage = error.response.data.message;
-    }
-  }
-  
-  console.error(errorMessage, error);
-  toast.error(errorMessage);
 };
 
 // Helper pour déterminer le type de fichier

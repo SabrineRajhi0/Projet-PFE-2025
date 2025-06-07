@@ -10,21 +10,22 @@ public class GlobalCorsConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-            // Pour Spring Boot 2.7+ ou supérieur
-            .allowedOriginPatterns(
-            		"http://localhost:3000"
-            )
+            .allowedOriginPatterns("http://localhost:3000")
             .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")
             .allowedHeaders(
                 "Authorization",
                 "Content-Type",
                 "Accept",
                 "Origin",
-                "X-Requested-With"
+                "X-Requested-With",
+                "Access-Control-Allow-Origin",
+                "Access-Control-Allow-Credentials"
             )
             .exposedHeaders(
                 "Authorization",
-                "Content-Disposition"
+                "Content-Disposition",
+                "Access-Control-Allow-Origin",
+                "Access-Control-Allow-Credentials"
             )
             .allowCredentials(true)
             .maxAge(3600);

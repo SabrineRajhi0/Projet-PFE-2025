@@ -81,27 +81,25 @@ public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Excepti
                 .requestMatchers("/api/apprenant/**").hasAnyAuthority("APP_AI_BASIC", "APP_DATA_VIEW")
 
                 .requestMatchers("/api/enseignant/**").hasAnyAuthority("ENS_AI_ADVANCED", "ENS_DATA_MANAGE")
-                  .requestMatchers("/api/type-element/**").hasRole("ADMIN")
-                .requestMatchers("/api/type-element/getAllTypeElements").hasRole("APPRENANT")
-                .requestMatchers("/api/type-element/getAllTypeElements").hasRole("ENSEIGNANT")
-                .requestMatchers("/api/type-element/getAllTypeElements").hasRole("ADMIN")
                 
-                .requestMatchers("/api/espacecours/getAllespacecours").hasRole("APPRENANT")
-                .requestMatchers("/api/espacecours/getAllespacecours").hasRole("ENSEIGNANT")
-                .requestMatchers("/api/espacecours/getAllespacecours").hasRole("ADMIN")
+                // Type Element endpoints - specific before general
+                .requestMatchers("/api/type-element/getAllTypeElements").permitAll()
+                .requestMatchers("/api/type-element/**").hasAnyRole("ADMIN")
                 
+                // Espace Cours endpoints
+                .requestMatchers("/api/espaceCours/tablcour").permitAll()
+                .requestMatchers("/api/espacecours/getAllespacecours").permitAll()
                 
-                .requestMatchers("/api/element/*/download").hasRole("APPRENANT")
-                .requestMatchers("/api/element/*/download").hasRole("ENSEIGNANT")
-                
-                .requestMatchers("/api/element/*/download-info").hasRole("APPRENANT")
-                .requestMatchers("/api/element/*/download-info").hasRole("ENSEIGNANT")
-                
-                .requestMatchers("/api/espaceCours/tablcour").authenticated()
-                .requestMatchers("/api/element/upload").hasRole("ADMIN")
-                .requestMatchers("/api/element/**").hasRole("ADMIN")
+                // Element endpoints - most specific first
+                .requestMatchers("/api/element/v1/getByEspaceCoursId/**").permitAll()
+                .requestMatchers("/api/element-cours/v1/getByEspaceCoursId/**").permitAll()
+                .requestMatchers("/api/element/*/download").hasAnyRole("APPRENANT", "ENSEIGNANT", "ADMIN")
+                .requestMatchers("/api/element/*/download-info").hasAnyRole("APPRENANT", "ENSEIGNANT", "ADMIN")
+                .requestMatchers("/api/element/upload").hasAnyRole("ENSEIGNANT", "ADMIN")
+                // This catch-all for /api/element/** should come last
+                .requestMatchers("/api/element/**").hasAnyRole("APPRENANT", "ENSEIGNANT", "ADMIN")
                
-                .requestMatchers("/api/espacecours/getAllespacecours").hasRole("ENSEIGNANT")
+                .requestMatchers("/api/espacecours/getAllespacecours").hasAnyRole("APPRENANT", "ENSEIGNANT", "ADMIN")
                  
                 .requestMatchers("/users/all").hasRole("ADMIN") // Restrict /users/all to ADMIN
 
@@ -112,10 +110,7 @@ public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Excepti
                 .requestMatchers("/users/rejetee/**").hasRole("ADMIN") // Restrict reject endpoint
 
                 .requestMatchers("/users/unblock/**").hasRole("ADMIN") // Restrict unblock endpoint
-
                 .requestMatchers("/users/delete/**").hasRole("ADMIN")
-                .requestMatchers("/api/espaceCours/tablcour").authenticated()
-                .requestMatchers("/api/type-element/**").authenticated()
 
             .anyRequest().authenticated()
         )

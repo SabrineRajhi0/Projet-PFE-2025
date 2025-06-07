@@ -3,22 +3,21 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import TableDropdown from "components/Dropdowns/TableDropdown.js";
 import EditCourseModal from "components/Cards/EditCourseModal.js";
-import { fetchEspacesCoursWithElements } from "../../Services/services";
-import { AuthContext } from "views/auth/AuthContext"; // Import du contexte
+import { AuthContext } from "views/auth/AuthContext";
+import { toast } from 'react-toastify';
 
 // Constantes API
 const API_BASE_URL = "http://localhost:8087/api";
-const TYPE_ELEMENTS_URL = `${API_BASE_URL}/type-element/getAllTypeElements`;
 const ESPACE_COURS_URL = `${API_BASE_URL}/espaceCours/getAllEspaceCours`;
 
 export default function CardCours({ color = "light" }) {
   const navigate = useNavigate();
   const { user, refreshAccessToken } = useContext(AuthContext);
-
+  const [loading, setLoading] = useState(true);
   const [editCourse, setEditCourse] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-
   const [cours, setCours] = useState([]);
+  const [error, setError] = useState(null);
 
   // Fonction pour normaliser les rôles
   const getNormalizedRole = useCallback((roles) => {
@@ -35,23 +34,59 @@ export default function CardCours({ color = "light" }) {
   );
 
   // Fonction pour requêtes avec token + rafraîchissement
-  const fetchDataWithAuth = useCallback(async (url, options = {}) => {
+  const makeAuthenticatedRequest = useCallback(async (url, options = {}) => {
     try {
-      let token = user?.accessToken;
-      const response = await axios.get(url, {
+      if (!user?.accessToken) {
+        throw new Error('No access token available');
+      }
+
+      // Verify user role before making request
+      const userRole = user.roles?.find(role => 
+        ['ROLE_ADMIN', 'ROLE_ENSEIGNANT', 'ROLE_APPRENANT'].includes(role)
+      );
+      
+      if (!userRole) {
+        throw new Error('Vous n\'avez pas les permissions nécessaires');
+      }
+
+      const token = user.accessToken;
+      const response = await axios({
         ...options,
-        headers: { Authorization: `Bearer ${token}` }
+        url,
+        method: options.method || 'GET',
+        headers: {
+          ...options.headers,
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'Role': userRole // Add role to header for backend verification
+        }
       });
+
       return response;
     } catch (error) {
       if (error.response?.status === 401) {
-        const newToken = await refreshAccessToken();
-        if (newToken) {
-          const response = await axios.get(url, {
-            ...options,
-            headers: { Authorization: `Bearer ${newToken}` }
-          });
-          return response;
+        try {
+          const newToken = await refreshAccessToken();
+          const userRole = user.roles?.find(role => 
+            ['ROLE_ADMIN', 'ROLE_ENSEIGNANT', 'ROLE_APPRENANT'].includes(role)
+          );
+          
+          if (newToken) {
+            const retryResponse = await axios({
+              ...options,
+              url,
+              method: options.method || 'GET',
+              headers: {
+                ...options.headers,
+                'Authorization': `Bearer ${newToken}`,
+                'Content-Type': 'application/json',
+                'Role': userRole
+              }
+            });
+            return retryResponse;
+          }
+        } catch (refreshError) {
+          throw new Error('Session expirée. Veuillez vous reconnecter.');
         }
       }
       throw error;
@@ -62,41 +97,79 @@ export default function CardCours({ color = "light" }) {
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
-        const [, coursRes] = await Promise.all([
-          fetchDataWithAuth(TYPE_ELEMENTS_URL), // peut être supprimé si inutile
-          fetchEspacesCoursWithElements(user.accessToken)
-        ]);
-        setCours(coursRes);
+        setLoading(true);
+        if (!user) {
+          throw new Error('Veuillez vous connecter pour accéder à cette page');
+        }
+
+        // Verify role authorization
+        if (!user.roles?.some(role => ['ROLE_ADMIN', 'ROLE_ENSEIGNANT', 'ROLE_APPRENANT'].includes(role))) {
+          throw new Error('Vous n\'avez pas les permissions nécessaires');
+        }
+
+        // Get courses based on role
+        const coursRes = await makeAuthenticatedRequest(ESPACE_COURS_URL);
+        setCours(coursRes.data);
+        setError(null);
       } catch (error) {
         console.error("Erreur lors du chargement initial:", error);
+        
+        // Handle different error types
+        if (error.message === 'Session expirée. Veuillez vous reconnecter.' || 
+            error.message === 'Veuillez vous connecter pour accéder à cette page') {
+          setError('Votre session a expiré. Veuillez vous reconnecter.');
+          toast.error('Session expirée');
+          navigate('/auth/login');
+          return;
+        }
+        
+        if (error.message === 'Vous n\'avez pas les permissions nécessaires' ||
+            error.response?.status === 403) {
+          const message = error.response?.data?.message || 
+            'Accès non autorisé. Veuillez vérifier vos permissions pour cet élément de cours.';
+          setError(message);
+          toast.error(message);
+          
+          // If it's a specific course access issue, we might want to reload the course list
+          if (error.config?.url?.includes('/getByEspaceCoursId/')) {
+            makeAuthenticatedRequest(ESPACE_COURS_URL)
+              .then(response => {
+                setCours(response.data);
+              })
+              .catch(err => console.error('Error reloading courses:', err));
+          }
+          return;
+        }
+
+        // Handle other API errors
+        const errorMessage = error.response?.data?.message || 'Une erreur est survenue lors du chargement des cours';
+        setError(errorMessage);
+        toast.error(errorMessage);
+      } finally {
+        setLoading(false);
       }
     };
 
-    if (user?.accessToken) {
-      fetchInitialData();
-    }
-  }, [user, fetchDataWithAuth]);
+    fetchInitialData();
+  }, [navigate, makeAuthenticatedRequest, user]);
 
-  // Chargement conditionnel selon rôle
-  useEffect(() => {
-    const fetchCoursWithAuth = async () => {
-      if (!user) return;
-      const role = getNormalizedRole(user.roles);
-      if (!["enseignant", "apprenant", "admin"].includes(role)) return;
+  // If loading or error, show appropriate UI
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
 
-      try {
-        const token = user.accessToken || localStorage.getItem("accessToken");
-        const response = await axios.get(ESPACE_COURS_URL, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setCours(response.data);
-      } catch (error) {
-        console.error("Erreur lors du chargement des cours :", error);
-      }
-    };
-
-    fetchCoursWithAuth();
-  }, [user, getNormalizedRole]);
+  if (error) {
+    return (
+      <div className="text-center p-4 text-red-600">
+        <div className="text-xl font-bold mb-2">Erreur</div>
+        <div>{error}</div>
+      </div>
+    );
+  }
 
   const handleEdit = (course) => {
     setEditCourse(course);
