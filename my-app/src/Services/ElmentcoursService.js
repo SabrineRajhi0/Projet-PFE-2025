@@ -7,7 +7,7 @@ const UPLOADS_BASE_URL = 'http://localhost:8087/uploads';
 
 // Helper pour gérer l'authentification
 const getAuthConfig = (isMultipart = false) => {
-  const token = localStorage.getItem('accessToken');
+  const token = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
   if (!token) {
     throw new Error('No access token available');
   }
@@ -16,7 +16,8 @@ const getAuthConfig = (isMultipart = false) => {
     headers: {
       Authorization: `Bearer ${token}`,
       ...(isMultipart ? {} : { 'Content-Type': 'application/json' })
-    }
+    },
+    withCredentials: true
   };
 };
 
@@ -29,8 +30,8 @@ const handleApiError = (error, customMessage) => {
   });
 
   if (error.response?.status === 401) {
-    toast.error('Session expirée. Veuillez vous reconnecter.');
-    // Redirect handling should be done at component level
+    // Session expiration will be handled by axios interceptors in apiClient.js
+    console.warn('Authentication error detected, will be handled by interceptors');
     throw new Error('Session expired');
   }
 

@@ -1,106 +1,110 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useContext } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
-import { jwtDecode } from "jwt-decode";
 import { toast } from "react-toastify";
-import React from 'react';
-
+import { CircularProgress, Box } from "@mui/material";
+import { AuthContext } from "./AuthContext";
 
 const ProtectedLayout = ({ requiredRole, children }) => {
   const navigate = useNavigate();
-  const token =
-    localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken");
-  let isAuthenticated = false;
-  let hasRequiredRole = false;
-  const inactivityTimeoutRef = useRef(null); // Référence pour le minuteur
-  const INACTIVITY_LIMIT = 15* 60 * 1000; // 15 minutes en millisecondes
+  const { user, loading, logout, isTokenExpired, refreshAccessToken } = useContext(AuthContext);
+  const inactivityTimeoutRef = useRef(null);
+  const INACTIVITY_LIMIT = 15 * 60 * 1000; // 15 minutes in milliseconds
 
-  // Fonction de déconnexion
+  // While auth is initializing, show loading indicator
+  if (loading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  // Determine authentication status
+  const isAuthenticated = !!user && !!user.accessToken;
+
+  // Check if user has the required role
+  const hasRequiredRole = isAuthenticated && (!requiredRole ||
+    (user.roles && Array.isArray(user.roles) && user.roles.includes(requiredRole)));
+
+  // Function to handle logout
   const onLogout = () => {
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
-    sessionStorage.removeItem("accessToken");
-    sessionStorage.removeItem("refreshToken");
-    toast.info("Session expirée en raison d'une inactivité. Veuillez vous reconnecter.");
-    return <Navigate to="/login" replace />;
+    logout();
+    navigate("/auth/login", { replace: true });
   };
 
-  // Réinitialiser le minuteur d'inactivité
+  // Reset inactivity timer
   const resetInactivityTimer = () => {
     if (inactivityTimeoutRef.current) {
-      clearTimeout(inactivityTimeoutRef.current); // Effacer l'ancien minuteur
+      clearTimeout(inactivityTimeoutRef.current);
     }
     inactivityTimeoutRef.current = setTimeout(() => {
-      onLogout(); // Déconnexion après inactivité
+      toast.info("Session expirée en raison d'une inactivité. Veuillez vous reconnecter.");
+      onLogout();
     }, INACTIVITY_LIMIT);
   };
 
-  // Vérification du token
-  if (token) {
-    try {
-      const decodedToken = jwtDecode(token);
-      console.log("Decoded Token:", decodedToken);
-
-      const expirationTime = decodedToken.exp * 1000;
-      const userRoles = decodedToken.roles || decodedToken.authorities || [];
-
-      if (expirationTime >= Date.now()) {
-        isAuthenticated = true;
-
-        if (requiredRole) {
-          hasRequiredRole = Array.isArray(userRoles)
-            ? userRoles.includes(requiredRole)
-            : userRoles === requiredRole;
-        } else {
-          hasRequiredRole = true;
-        }
-      }
-    } catch (error) {
-      console.error("Erreur lors du décodage du token:", error);
-      toast.error("Token invalide. Veuillez vous reconnecter.");
-    }
-  }
-
-  // Gérer l'inactivité avec useEffect
+  // Token verification and inactivity tracking
   useEffect(() => {
+    // If not authenticated, redirect to login
     if (!isAuthenticated) {
-      return onLogout();
+      return;
     }
 
-    // Ajouter des écouteurs d'événements pour détecter l'activité
-    const events = ["click", "mousemove", "keydown", "scroll", "touchstart"];
-    events.forEach((event) => {
-      window.addEventListener(event, resetInactivityTimer);
-    });
+    const validateAndSetupSession = async () => {
+      try {
+        // Verify token validity
+        if (isTokenExpired(user.accessToken)) {
+          console.log("Access token expired, attempting refresh...");
+          // Try to refresh the token
+          const newToken = await refreshAccessToken();
+          if (!newToken) {
+            toast.error("Votre session a expiré. Veuillez vous reconnecter.");
+            onLogout();
+          }
+        }
 
-    // Lancer le minuteur au chargement
-    resetInactivityTimer();
+        // Set up activity tracking regardless of refresh result
+        // as long as we have a valid session
+        const events = ["click", "mousemove", "keydown", "scroll", "touchstart"];
+        events.forEach(event => {
+          window.addEventListener(event, resetInactivityTimer);
+        });
+        resetInactivityTimer();
 
-    // Nettoyer les écouteurs et le minuteur lors du démontage
-    return () => {
-      events.forEach((event) => {
-        window.removeEventListener(event, resetInactivityTimer);
-      });
-      if (inactivityTimeoutRef.current) {
-        clearTimeout(inactivityTimeoutRef.current);
+        // Cleanup function
+        return () => {
+          events.forEach(event => {
+            window.removeEventListener(event, resetInactivityTimer);
+          });
+          if (inactivityTimeoutRef.current) {
+            clearTimeout(inactivityTimeoutRef.current);
+          }
+        };
+      } catch (error) {
+        console.error("Error validating session:", error);
+        toast.error("Une erreur s'est produite lors de la validation de votre session.");
+        onLogout();
       }
     };
-  }, [isAuthenticated]);
 
-  // Redirection si non authentifié
+    validateAndSetupSession();
+  }, [isAuthenticated, user, isTokenExpired, refreshAccessToken, onLogout]);
+
+  // Redirection if not authenticated
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/auth/login" replace />;
   }
 
-  // Redirection si le rôle requis n'est pas présent
-  if (!hasRequiredRole) {
+  // Redirection if the required role is not present
+  if (requiredRole && !hasRequiredRole) {
     toast.error("Accès non autorisé. Vous n'avez pas les permissions nécessaires.");
     setTimeout(() => {
-      navigate("/"); // Rediriger vers la page d'accueil
+      navigate("/"); // Redirect to home page
     }, 100);
     return null;
   }
 
-  // Rendre les enfants si tout est valide
+  // Render children if everything is valid
   return children;
 };
 

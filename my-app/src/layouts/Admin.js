@@ -4,7 +4,6 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import AdminNavbar from "components/Navbars/AdminNavbar.js";
 import Sidebar from "components/Sidebar/Sidebar.js";
 import FooterAdmin from "components/Footers/FooterAdmin.js";
-import CardSettings from "components/Cards/CardSettings.js";
 import Dashboard from "views/admin/Dashboard.js";
 import GererCours from "views/admin/GererCours";
 import Tables from "views/admin/Tables.js";
@@ -36,11 +35,11 @@ export default function Admin() {
               element={<AjouterElementCours />}
             />
             <Route path="AjouterEspaceCours" element={<AjouterEspaceCours />} />
-            <Route path="ModifierCoursPage" element={<ModifierCoursPage />} />
+            <Route path="ModifierCoursPage" element={<ModifierCoursPage />} /> {/* Reverted route */}
 
             <Route path="listusers" element={<Utilisateurs />} />
             <Route path="mescours" element={<MesCours />} />
-             <Route path="ListCours/idespac" element={<ListCours />} />
+             <Route path="ListCours/idespac" element={<ListCours />} /> {/* Reverted route */}
             <Route path="" element={<Navigate to="dashboard" replace />} />
           </Routes>
           <FooterAdmin />

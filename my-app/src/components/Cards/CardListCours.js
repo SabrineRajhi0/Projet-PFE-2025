@@ -8,7 +8,9 @@ import { elementCoursService } from '../../Services/ElmentcoursService';
 
 const CardListCours = () => {
   const location = useLocation();
-  const userRole = location.state?.userRole || 'apprenant'; 
+  const userRole = location.state?.userRole || 'apprenant'; // Reverted: Original userRole logic
+  console.log(`[CardListCours] Current userRole: ${userRole}, Location state:`, location.state); // Reverted: Original debug line
+
   const navigate = useNavigate();
   
   const [cours, setCours] = useState([]);
@@ -201,12 +203,12 @@ const CardListCours = () => {
   };
 
   return (
-    <div className="mescours-container">
+    <div className="mescours-container course-container"> {/* Added course-container for global styling */}
       <div className="mescours-header">
         <p className="mescours-welcome">Bienvenue sur la page de vos cours.</p>
 
            {userRole === 'admin' && (
-          <button onClick={() => setShowAddModal(true)}>
+          <button onClick={() => setShowAddModal(true)} className="btn-add-cours"> {/* Added class */}
 
           Ajouter cours
         </button>
@@ -218,7 +220,7 @@ const CardListCours = () => {
         <thead>
           <tr>
             <th>ID</th>
-            <th>Icon</th>
+            {/* <th>Icon</th> */}
             <th>Titre</th>
             <th>Description</th>
             <th>Action</th>
@@ -229,25 +231,23 @@ const CardListCours = () => {
   {cours.map((coursItem) => (
     <tr key={coursItem.idespac}>
       <td>{coursItem.idespac}</td>
-      <td>
-        <img src="/path/to/course-icon.png" alt="" className="course-icon" />
-      </td>
+      {/*<td>
+        <img src=\"/path/to/course-icon.png\" alt=\"Course Icon\" className=\"course-icon\" /> 
+      </td>*/}
       <td>{coursItem.titre}</td>
       <td>{coursItem.description}</td>
      
-  {/* Bouton Ouvrir - visible seulement pour étudiants et enseignants */}
               <td>
-  {(userRole === 'apprenant' || userRole === 'enseignant') && (
-    <button onClick={() => handleOpenCours(coursItem)}>Ouvrir</button>
-  )}
-          {/* Boutons Modifier et Supprimer uniquement pour admin */}
-         {userRole === 'admin' && (
-    <>
-      <button onClick={() => handleNavigateToEditCours(coursItem)}>Modifier</button>
-      <button onClick={() => handleDeleteCours(coursItem.idespac)}>Supprimer</button>
-    </>
-  )}
-</td>
+                {(userRole === 'apprenant' || userRole === 'enseignant') && (
+                  <button onClick={() => handleOpenCours(coursItem)} className="btn-open-cours">Ouvrir</button> /* Added class */
+                )}
+                {userRole === 'admin' && (
+                  <>
+                    <button onClick={() => handleNavigateToEditCours(coursItem)} className="btn-edit-cours">Modifier</button> {/* Added class */}
+                    <button onClick={() => handleDeleteCours(coursItem.idespac)} className="btn-delete-cours">Supprimer</button> {/* Added class */}
+                  </>
+                )}
+              </td>
     </tr>
   ))}
 </tbody>
@@ -278,11 +278,11 @@ const CardListCours = () => {
                     {typeElementId === '1' && <img src="/image-icon.png" alt="" />}
                   </div>
                   <div className="modal-actions">
-                    <button type="submit">Envoyer</button>
+                    <button type="submit" className="bouton-confirmer-modal">Envoyer</button> {/* Added class */}
 
 
 
-                    <button type="button" onClick={() => setShowAddModal(false)}>Annuler</button>
+                    <button type="button" onClick={() => setShowAddModal(false)} className="bouton-annuler-modal">Annuler</button> {/* Added class */}
                   </div>
                 </form>
               </div>
@@ -308,8 +308,8 @@ const CardListCours = () => {
                     required 
                   />
                   <div className="modal-actions">
-                    <button type="submit">Mettre à jour</button>
-                    <button type="button" onClick={() => setShowEditModal(false)}>Annuler</button>
+                    <button type="submit" className="bouton-confirmer-modal">Mettre à jour</button> {/* Added class */}
+                    <button type="button" onClick={() => setShowEditModal(false)} className="bouton-annuler-modal">Annuler</button> {/* Added class */}
                   </div>
                 </form>
               </div>
@@ -323,7 +323,7 @@ const CardListCours = () => {
           <div className="modal-view-content">
             <div className="modal-header">
               <h2>Documents pour {selectedCours?.titre}</h2>
-              <button onClick={() => setShowViewModal(false)}>✕</button>
+              <button onClick={() => setShowViewModal(false)} >✕</button> {/* Removed btn-close-modal, rely on modal-header button style or add specific if needed */}
             </div>
             <div className="modal-body">
               <div className="document-list">
@@ -352,11 +352,11 @@ const CardListCours = () => {
                     <div className="preview-header">
                       <h3>{selectedElement.element.desElt}</h3>
                       <div className="preview-actions">
-                        <button onClick={handleDownload} disabled={isDownloading}>
+                        <button onClick={handleDownload} disabled={isDownloading} > {/* Removed specific class, covered by .preview-actions button */}
                           {isDownloading ? 'Téléchargement...' : '↓ Télécharger'}
                         </button>
                         {navigator.share && (
-                          <button onClick={() => handleShare(selectedElement)}>
+                          <button onClick={() => handleShare(selectedElement)} > {/* Removed specific class, covered by .preview-actions button */}
                             Partager
                           </button>
                         )}

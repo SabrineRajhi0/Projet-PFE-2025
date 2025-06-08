@@ -32,6 +32,16 @@ public class Usercontrollers {
     @GetMapping("/all")
     public ResponseEntity<List<User>> getAllUsers() {
         List<User> users = userService.getAllUsers();
+        // Add debug information
+        if (users != null && !users.isEmpty()) {
+            for (User user : users) {
+                if (user.getCreatedAt() == null) {
+                    System.out.println("WARNING: User " + user.getId() + " has null createdAt");
+                } else {
+                    System.out.println("INFO: User " + user.getId() + " createdAt: " + user.getCreatedAt());
+                }
+            }
+        }
         return ResponseEntity.ok(users);
     }
 
@@ -123,5 +133,24 @@ public class Usercontrollers {
     public ResponseEntity<Void> deleteUser(@PathVariable Long userId) {
         userService.deleteUser(userId);
         return ResponseEntity.noContent().build();
+    }
+
+    // Debug endpoint to check createdAt values
+    @GetMapping("/debug/{userId}")
+    public ResponseEntity<Map<String, Object>> debugUser(@PathVariable Long userId) {
+        try {
+            User user = userService.getUserById(userId);
+            Map<String, Object> response = new java.util.HashMap<>();
+            response.put("id", user.getId());
+            response.put("email", user.getEmail());
+            response.put("hasCreatedAt", user.getCreatedAt() != null);
+            response.put("createdAt", user.getCreatedAt());
+            response.put("createdAtFormatted", user.getCreatedAt() != null ? 
+                         user.getCreatedAt().toString() : "null");
+            return ResponseEntity.ok(response);
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                   .body(Map.of("error", ex.getMessage()));
+        }
     }
 }

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import {
   Card,
   CardContent,
@@ -14,8 +14,8 @@ import {
   DialogActions,
   Snackbar,
   Alert,
+  CircularProgress
 } from "@mui/material";
-import CircularProgress from "@mui/material/CircularProgress";
 import { useLocation, useNavigate } from "react-router-dom";
 
 const QuizPage = () => {
@@ -25,11 +25,10 @@ const QuizPage = () => {
   const [timer, setTimer] = useState(20);
   const [showResult, setShowResult] = useState(false);
   const [score, setScore] = useState(0);
-  const location = useLocation();
-  const [quizData, setQuizData] = useState(null);
+  const location = useLocation();  const [quizData, setQuizData] = useState(null);
   const navigate = useNavigate();
   const [showLoginDialog, setShowLoginDialog] = useState(false);
-  const hasInitialized = useRef(false);
+  // const hasInitialized = useRef(false); // Commented out as it's not being used
   const [showScoreNotification, setShowScoreNotification] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState("");
   const [notificationSeverity, setNotificationSeverity] = useState("info");
@@ -88,7 +87,6 @@ const QuizPage = () => {
       navigate("/"); // or wherever you want to redirect
     }
   }, [location.state, navigate]);
-
   useEffect(() => {
     if (!showResult && quizData && quizData.length > 0) {
       const interval = setInterval(() => {
@@ -103,7 +101,7 @@ const QuizPage = () => {
 
       return () => clearInterval(interval);
     }
-  }, [currentQuestionIndex, showResult, quizData]);
+  }, [currentQuestionIndex, showResult, quizData, handleNext]);
 
   const handleNext = () => {
     if (!quizData || !quizData[currentQuestionIndex]) return;

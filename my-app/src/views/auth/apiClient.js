@@ -1,32 +1,60 @@
 import axios from "axios";
+import { jwtDecode } from "jwt-decode";
 
 const apiClient = axios.create({
   baseURL: "http://localhost:8087",
+  withCredentials: true,
 });
 
+// Function to check if token is expired
+const isTokenExpired = (token) => {
+  try {
+    const decodedToken = jwtDecode(token);
+    const currentTime = Date.now() / 1000;
+    return decodedToken.exp < currentTime;
+  } catch (error) {
+    console.error('Error checking token expiration:', error);
+    return true; // If we can't decode it, consider it expired
+  }
+};
+
 // Fonction pour configurer l'intercepteur avec une fonction de navigation
-export const configureApiClient = (navigate) => {
+export const configureApiClient = (navigate, refreshTokenCallback) => {
   apiClient.interceptors.response.use(
     (response) => response,
-    (error) => {
+    async (error) => {
       if (error.response && error.response.status === 401) {
-        const refreshToken = localStorage.getItem("refreshToken");
-        // eslint-disable-next-line no-undef
+        const refreshToken = localStorage.getItem("refreshToken") || sessionStorage.getItem("refreshToken");
+        
         if (refreshToken && !isTokenExpired(refreshToken)) {
-          // Appeler une API pour renouveler le token
-          apiClient
-            .post("/refresh", { refreshToken })
-            .then((response) => {
-              localStorage.setItem("accessToken", response.data.accessToken);
-              // Réessayer la requête initiale
-            })
-            .catch(() => {
-              navigate("/login");
-            });
+          try {
+            // Call the API to renew the token
+            const response = await apiClient.post("/auth/refresh", { refreshToken });
+            const newToken = response.data.accessToken;
+            
+            // Update token in storages
+            localStorage.setItem("accessToken", newToken);
+            sessionStorage.setItem("accessToken", newToken);
+            
+            if (refreshTokenCallback) {
+              refreshTokenCallback(newToken);
+            }
+            
+            // Retry the original request
+            error.config.headers['Authorization'] = `Bearer ${newToken}`;
+            return axios(error.config);
+          } catch (refreshError) {
+            console.error("Token refresh failed:", refreshError);
+            navigate("/auth/login");
+            return Promise.reject(refreshError);
+          }
         } else {
-          navigate("/login");
+          // No valid refresh token, redirect to login
+          navigate("/auth/login");
+          return Promise.reject(error);
         }
       }
+      return Promise.reject(error);
     }
   );
 };

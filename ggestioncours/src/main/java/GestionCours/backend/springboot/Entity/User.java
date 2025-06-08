@@ -3,6 +3,11 @@ package GestionCours.backend.springboot.Entity;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import org.hibernate.annotations.CreationTimestamp;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -13,11 +18,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Transient;
-import lombok.NoArgsConstructor;
-
 
 
 
@@ -78,6 +80,15 @@ public abstract  class  User implements Serializable {
 
     private String resetToken;
     private LocalDateTime resetTokenExpiry;
+
+    @Column(name = "created_at", updatable = false)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    private LocalDateTime createdAt;
+    
+    @JsonProperty("createdAt")
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
       public User() {}
 
 

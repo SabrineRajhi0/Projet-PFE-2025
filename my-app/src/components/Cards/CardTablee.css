@@ -1,4 +1,3 @@
-
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -95,6 +94,10 @@
   box-shadow: 0 1px 3px rgba(0,0,0,0.12);
 }
 
+.tableau-utilisateurs thead {
+  background-color: #2d3748;
+}
+
 .tableau-utilisateurs th,
 .tableau-utilisateurs td {
   padding: 0.75rem;
@@ -102,278 +105,31 @@
   border-bottom: 1px solid #56698e;
 }
 
-
-/* Tableau - Ajoutez ces règles APRÈS le style existant de .tableau-utilisateurs th */
 .tableau-utilisateurs th {
-  background-color: #1f2937;
-  color: white;
+  color: #f7fafc;
   font-weight: 600;
-  cursor: pointer; /* Ajout */
-  transition: background-color 0.3s ease; /* Ajout */
-  position: relative; /* Ajout */
-}
-
-/* Nouveaux styles à ajouter */
-.tableau-utilisateurs th:active {
-  background-color: #111827 !important;
-}
-
-.tableau-utilisateurs th.sorted {
-  background-color: #374151;
-}
-
-.tableau-utilisateurs th.sorted::after {
-  content: " 🔽"; /* ou " 🔼" selon l'ordre */
-  position: absolute;
-  right: 10px;
-}
-
-
-.tableau-utilisateurs tr:hover {
-  background-color: #374151;;
-}
-
-/* Formulaires */
-.conteneur-formulaire {
-  background-color: #f3f4f6;
-  padding: 1.5rem;
-  border-radius: 0.5rem;
-  margin: 1rem 0;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
-}
-
-.conteneur-formulaire div {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.conteneur-formulaire label {
-  font-weight: 500;
-  color: #374151;
-}
-
-.conteneur-formulaire input,
-.conteneur-formulaire select {
-  padding: 0.5rem;
-  border: 1px solid #d1d5db;
-  border-radius: 0.375rem;
-  width: 100%;
-}
-
-/* Boutons généraux */
-button {
-  transition: all 0.2s ease;
-  font-weight: 500;
-}
-
-button:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-}
-
-/* Boutons spécifiques */
-.bouton-deconnexion {
-  background-color: #6b7280;
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 0.25rem;
-  border: none;
-  cursor: pointer;
-  float: right;
-}
-
-.bouton-deconnexion:hover {
-  background-color: #4b5563;
-}
-
-.bouton-activer { background-color: #10b981; }
-.bouton-bloquer { background-color: #f59e0b; }
-.bouton-rejeter { background-color: #ef4444; }
-.bouton-debloquer { background-color: #3b82f6; }
-.bouton-modifier { background-color: #8b5cf6; }
-.bouton-supprimer { background-color: #64748b; }
-
-/* Style commun des boutons d'action */
-.bouton-activer,
-.bouton-bloquer,
-.bouton-rejeter,
-.bouton-debloquer,
-.bouton-modifier,
-.bouton-supprimer {
-  color: white;
-  padding: 0.375rem 0.75rem;
-  margin: 0.125rem;
-  border-radius: 0.25rem;
-  border: none;
-  cursor: pointer;
+  text-transform: uppercase;
   font-size: 0.875rem;
-}
-
-/* Hover states */
-.bouton-activer:hover { background-color: #059669; }
-.bouton-bloquer:hover { background-color: #d97706; }
-.bouton-rejeter:hover { background-color: #dc2626; }
-.bouton-debloquer:hover { background-color: #2563eb; }
-.bouton-modifier:hover { background-color: #7c3aed; }
-.bouton-supprimer:hover { background-color: #475569; }
-
-/* Modales */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0,0,0,0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.modal-content {
-  background-color: white;
-  padding: 2rem;
-  border-radius: 0.5rem;
-  width: 90%;
-  max-width: 500px;
-}
-
-.modal-content h3 {
-  margin-top: 0;
-  color: #1f2937;
-}
-
-.modal-content p {
-  margin: 1rem 0;
-  color: #4b5563;
-}
-
-.modal-input {
-  width: 100%;
-  padding: 0.5rem;
-  margin: 0.5rem 0;
-  border: 1px solid #d1d5db;
-  border-radius: 0.375rem;
-}
-
-/* Boutons de confirmation */
-.bouton-confirmer {
-  background-color: #3b82f6;
-  color: white;
-  padding: 0.5rem 1rem;
+  padding: 0.75rem 1rem;
   border: none;
-  border-radius: 0.25rem;
-  cursor: pointer;
-  margin-right: 0.5rem;
 }
 
-.bouton-confirmer:hover {
-  background-color: #2563eb;
+/* Zebra striping and hover effects */
+.tableau-utilisateurs tbody tr:nth-child(even) {
+  background-color: #f7fafc;
 }
 
-.bouton-annuler {
-  background-color: #6b7280;
-  color: white;
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 0.25rem;
-  cursor: pointer;
+.tableau-utilisateurs tbody tr:hover {
+  background-color: #e2e8f0;
 }
 
-.bouton-annuler:hover {
-  background-color: #4b5563;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .conteneur-formulaire {
-    grid-template-columns: 1fr;
-  }
-  
-  .tableau-utilisateurs {
-    display: block;
-    overflow-x: auto;
-  }
-}
-
-
-
-/* Style général */
-.tableau-admin {
-  max-width: 1200px;
-  margin: 2rem auto;
-  padding: 1rem;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
-.chargement {
-  text-align: center;
-  font-size: 1.2rem;
-  color: #4b5563;
-  padding: 2rem;
-}
-
-.message-erreur {
-  background-color: #fee2e2;
-  color: #dc2626;
-  padding: 1rem;
-  border-radius: 0.5rem;
-  margin: 1rem 0;
-  border: 1px solid #fca5a5;
-}
-
-/* Tableau */
-.tableau-utilisateurs {
-  width: 100%;
-  border-collapse: collapse;
-  margin: 2rem 0;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.12);
-}
-
-.tableau-utilisateurs th,
 .tableau-utilisateurs td {
-  padding: 0.75rem;
-  text-align: left;
-  border-bottom: 1px solid #e5e7eb;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #e2e8f0;
+  color: #4a5568;
+  font-size: 0.875rem;
 }
 
-/* Styles modifiés pour les en-têtes */
-.tableau-utilisateurs th {
-  background-color: #1f2937;
-  color: white;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  position: relative;
-}
-
-.tableau-utilisateurs th:active {
-  background-color: #111827 !important;
-  transform: scale(0.98);
-}
-
-.tableau-utilisateurs th.sorted {
-  background-color: #374151;
-}
-
-.tableau-utilisateurs th.sorted::after {
-  content: "▼";
-  margin-left: 8px;
-  font-size: 0.8em;
-  color: #93c5fd;
-}
-
-.tableau-utilisateurs th:hover {
-  background-color: #2d3748;
-}
-
-.tableau-utilisateurs tr:hover {
-  background-color: #f9fafb;
-}
 
 /* Formulaires */
 .conteneur-formulaire {
@@ -530,18 +286,113 @@ button:disabled {
   background-color: #4b5563;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-  .conteneur-formulaire {
-    grid-template-columns: 1fr;
-  }
-  
-  .tableau-utilisateurs {
-    display: block;
-    overflow-x: auto;
-  }
+/* Table Styles */
+.items-center {
+  border-collapse: separate;
+  border-spacing: 0;
 }
 
+.items-center th {
+  background-color: #f8fafc;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 1rem;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.items-center td {
+  padding: 1rem;
+  border-bottom: 1px solid #e2e8f0;
+  transition: all 0.2s;
+}
+
+.items-center tbody tr:hover {
+  background-color: #f8fafc;
+}
+
+/* Action Buttons */
+.bouton-activer,
+.bouton-bloquer,
+.bouton-supprimer,
+.bouton-debloquer {
+  padding: 0.5rem 1rem;
+  margin: 0 0.25rem;
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.bouton-activer:disabled,
+.bouton-bloquer:disabled,
+.bouton-supprimer:disabled,
+.bouton-debloquer:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Pagination Styles */
+.pagination-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background-color: white;
+  border-top: 1px solid #e2e8f0;
+}
+
+.pagination-info {
+  color: #4a5568;
+  font-size: 0.875rem;
+}
+
+.pagination-controls {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.pagination-button {
+  padding: 0.5rem 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.375rem;
+  background-color: white;
+  color: #4a5568;
+  font-size: 0.875rem;
+  transition: all 0.2s;
+}
+
+.pagination-button:hover:not(:disabled) {
+  background-color: #f8fafc;
+}
+
+.pagination-button:disabled {
+  background-color: #f1f5f9;
+  color: #94a3b8;
+  cursor: not-allowed;
+}
+
+.pagination-button.active {
+  background-color: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .items-center td,
+  .items-center th {
+    padding: 0.75rem 0.5rem;
+  }
+
+  .bouton-activer,
+  .bouton-bloquer,
+  .bouton-supprimer,
+  .bouton-debloquer {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.75rem;
+  }
+}
 
 .modal {
   position: fixed;
@@ -611,4 +462,149 @@ button:disabled {
 /* Optional: Style for unblock button confirmation */
 .modal-unblock .bouton-confirmer {
   background-color: #28a745; /* Green for unblock */
+}
+
+/* Boutons d'action */
+.bouton-supprimer {
+  padding: 8px 16px;
+  margin: 0 4px;
+  background-color: #dc2626;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.75rem;
+  transition: background-color 0.2s;
+}
+
+.bouton-supprimer:hover {
+  background-color: #b91c1c;
+}
+
+.bouton-supprimer:disabled {
+  background-color: #f87171;
+  cursor: not-allowed;
+}
+
+/* Enhanced Table Styles */
+.tableau-utilisateurs {
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+}
+.tableau-utilisateurs thead {
+  background-color: #2d3748;
+}
+.tableau-utilisateurs th {
+  color: #f7fafc;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.875rem;
+  padding: 0.75rem 1rem;
+  border: none;
+}
+.tableau-utilisateurs tbody tr:nth-child(even) {
+  background-color: #f7fafc;
+}
+.tableau-utilisateurs tbody tr:hover {
+  background-color: #e2e8f0;
+}
+.tableau-utilisateurs td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #e2e8f0;
+  color: #4a5568;
+  font-size: 0.875rem;
+}
+
+/* Modern container styling */
+.tableau-admin {
+  background-color: #fafafa;
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.05);
+}
+
+/* Center align table cells, but left-align first column */
+.tableau-utilisateurs th,
+.tableau-utilisateurs td {
+  text-align: center;
+  vertical-align: middle;
+}
+.tableau-utilisateurs th:first-child,
+.tableau-utilisateurs td:first-child {
+  text-align: left;
+  padding-left: 1rem;
+}
+
+/* Sticky header for scroll */
+.tableau-utilisateurs thead th {
+  position: sticky;
+  top: 0;
+  background-color: #2d3748;
+  color: #f7fafc;
+}
+
+/* Rounded rows with hover effect */
+.tableau-utilisateurs tbody tr {
+  transition: background-color 0.2s;
+}
+.tableau-utilisateurs tbody tr:hover {
+  background-color: #e2e8f0;
+}
+
+/* Modern button styling */
+.bouton-supprimer, .bouton-activer, .bouton-bloquer, .bouton-debloquer {
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  border-radius: 0.375rem;
+  transition: transform 0.1s, box-shadow 0.2s;
+}
+.bouton-supprimer:hover, .bouton-activer:hover, .bouton-bloquer:hover, .bouton-debloquer:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+/* Search and filter alignment */
+.tableau-admin .flex.flex-wrap.items-center {
+  gap: 1rem;
+}
+.tableau-admin input[type="text"] {
+  max-width: 300px;
+}
+.tableau-admin button {
+  min-width: 120px;
+}
+
+/* Filter button styling */
+.bouton-filtre {
+  background-color: #3b82f6; /* Tailwind indigo-500 */
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 0.375rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+.bouton-filtre:hover {
+  background-color: #2563eb; /* indigo-600 */
+}
+
+.bouton-tri {
+  background-color: #3b82f6;
+  color: white;
+  width: 2.25rem;
+  height: 2.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.2s ease;
+}
+
+.bouton-tri:hover {
+  background-color: #2563eb;
 }

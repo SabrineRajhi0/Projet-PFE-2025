@@ -48,7 +48,6 @@ function Choisir() {
       setSelectedChapitre(null);
     }
   };
-
   const fetchElementByidespac = async (idespac) => {
     try {
       const response = await axios.get(
@@ -57,7 +56,9 @@ function Choisir() {
       return response.data;
     } catch (err) {
       const message =
-        err.response?.status === 400
+        err.response?.status === 404
+          ? `Aucun élément de cours trouvé pour l'ID ${idespac}. Veuillez vérifier que le cours contient des fichiers.`
+          : err.response?.status === 400
           ? "Élément introuvable ou erreur serveur."
           : err.message;
       throw new Error(message);
@@ -120,27 +121,42 @@ function Choisir() {
       setLoadingProgress(100);
     }
   };
-
   const handleEnvoyer = async () => {
     if (selectedNiveau && selectedChapitre && selectedChapitre.nomchap) {
       try {
         setIsLoading(true);
         setLoadingProgress(0);
-        setLoadingMessage("Initialisation...");
-
-        const element = await fetchElementByidespac(
+        setLoadingMessage("Initialisation...");        console.log("Fetching elements for chapter ID:", selectedChapitre.espaceCours.idespac);
+        const response = await fetchElementByidespac(
           selectedChapitre.espaceCours.idespac
         );
+        
+        console.log("Backend response:", response);
 
-        if (element?.cheminElt) {
-          const quiz = await genererQuizDepuisPDF(element.cheminElt);
+        // Ensure we have an array to work with
+        const elements = Array.isArray(response) ? response : [response];
+        
+        if (!elements || elements.length === 0) {
+          throw new Error("Aucun élément trouvé pour ce chapitre.");
+        }
+
+        // Find the first PDF element
+        const pdfElement = elements.find(element => 
+          element && element.cheminElt && 
+          typeof element.cheminElt === 'string' && 
+          element.cheminElt.toLowerCase().endsWith('.pdf')
+        );
+
+        if (pdfElement?.cheminElt) {
+          console.log("Found PDF file:", pdfElement.cheminElt);
+          const quiz = await genererQuizDepuisPDF(pdfElement.cheminElt);
           if (quiz) {
             navigate("/quiz", { state: { quiz } });
           }
         } else {
           Swal.fire(
-            "Fichier introuvable",
-            "Le fichier est manquant pour cet élément.",
+            "Fichier PDF introuvable",
+            "Aucun fichier PDF n'a été trouvé pour ce chapitre. Veuillez choisir un autre chapitre.",
             "warning"
           );
         }

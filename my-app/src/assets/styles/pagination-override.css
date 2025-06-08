@@ -1,0 +1,37 @@
+/* Force pagination visibility */
+.pagination-container {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: relative !important;
+  z-index: 10 !important;
+}
+
+.pagination-mobile,
+.pagination-desktop {
+  display: flex !important;
+  visibility: visible !important;
+}
+
+/* Ensure table dropdowns appear above everything */
+.dropdown-menu {
+  z-index: 99999 !important;
+  position: absolute !important;
+}
+
+.dropdown-positioned {
+  z-index: 99999 !important;
+}
+
+/* Prevent table overflow from hiding elements */
+.course-table,
+.course-table tbody,
+.course-table tbody tr,
+.course-table tbody tr td {
+  overflow: visible !important;
+}
+
+/* Card container should not clip content */
+.relative.flex.flex-col.min-w-0.break-words {
+  overflow: visible !important;
+}

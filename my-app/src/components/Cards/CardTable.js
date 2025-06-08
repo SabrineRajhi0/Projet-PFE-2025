@@ -2,27 +2,34 @@ import React, { useState, useEffect, useContext } from "react";
 import PropTypes from "prop-types";
 import axios from "axios";
 import "components/Cards/CardTablee.css";
-
-// components
 import { AuthContext } from "views/auth/AuthContext";
+
+// Pagination constants
+const ITEMS_PER_PAGE = 10;
 
 export default function CardTable({ color }) {
   const {
     user,
     loading: authLoading,
-    refreshTokenIfNeeded,
+    refreshAccessToken,
   } = useContext(AuthContext);
+  
+  // States
   const [users, setUsers] = useState([]);
-  const [searchTerm, setSearchTerm] = useState(""); // Add search term state
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
   const [showBlockModal, setShowBlockModal] = useState(false);
-  const [showRejectModal, setShowRejectModal] = useState(false);
-  const [showUnblockModal, setShowUnblockModal] = useState(false); // Added for unblock confirmation
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showUnblockModal, setShowUnblockModal] = useState(false);
   const [userToBlock, setUserToBlock] = useState(null);
-  const [userToReject, setUserToReject] = useState(null);
-  const [userToUnblock, setUserToUnblock] = useState(null); // Added for unblock user
+  const [userToDelete, setUserToDelete] = useState(null);
+  const [userToUnblock, setUserToUnblock] = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
   const [reason, setReason] = useState("");
-  const [error, setError] = useState(null); // Added error state
+  const [error, setError] = useState(null);
+  const [selectedUserIds, setSelectedUserIds] = useState([]);
+  const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
+  const [sortOrder, setSortOrder] = useState("newest");
 
   const isAdmin = user?.roles?.includes("ROLE_ADMIN");
 
@@ -35,11 +42,34 @@ export default function CardTable({ color }) {
         const response = await axios.get("http://localhost:8087/users/all", {
           headers: { Authorization: `Bearer ${user.accessToken}` },
         });
-        setUsers(response.data);
+        
+        // console.log("Raw API response:", response.data);
+        
+        // For debugging, removed to fix warning
+        // const sampleUser = response.data && response.data.length > 0 ? response.data[0] : null;
+        // if (sampleUser) {
+        //   console.log("User properties:", Object.keys(sampleUser));
+        //   console.log("Sample user:", {
+        //     id: sampleUser.id,
+        //     email: sampleUser.email,
+        //     createdAt: sampleUser.createdAt,
+        //     created_at: sampleUser.created_at,
+        //     CREATEDAT: sampleUser.CREATEDAT,
+        //     CREATED_AT: sampleUser.CREATED_AT
+        //   });
+        // }
+        
+        const processedUsers = response.data.map(user => ({
+          ...user,
+          // Add a guaranteed creation date field
+          displayDate: user.createdAt || user.created_at || new Date().toISOString()
+        }));
+        
+        setUsers(processedUsers);
       } catch (err) {
         if (err.response?.status === 401) {
-          const refreshed = await refreshTokenIfNeeded();
-          if (refreshed) {
+          const newToken = await refreshAccessToken();
+          if (newToken) {
             fetchUsers();
           } else {
             setError("Session expirée, veuillez vous reconnecter");
@@ -53,44 +83,17 @@ export default function CardTable({ color }) {
       }
     };
     fetchUsers();
-  }, [isAdmin, user, authLoading, refreshTokenIfNeeded]);
-
-  // Handle activate user
-  const handleActivateClick = async (id) => {
-    setActionLoading(true);
-    try {
-      await axios.put(
-        `http://localhost:8087/users/activate/${id}`,
-        {},
-        {
-          headers: { Authorization: `Bearer ${user.accessToken}` },
-        }
-      );
-      setUsers(users.map((u) => (u.id === id ? { ...u, active: true } : u)));
-      setError(null);
-    } catch (err) {
-      if (err.response?.status === 401) {
-        const refreshed = await refreshTokenIfNeeded();
-        if (refreshed) handleActivateClick(id);
-      } else {
-        setError(
-          err.response?.data?.message ||
-            "Erreur lors de l'activation de l'utilisateur"
-        );
-      }
-    } finally {
-      setActionLoading(false);
-    }
-  };
+  }, [isAdmin, user, authLoading, refreshAccessToken]);
 
   // Handle block user
   const handleBlockClick = (id) => {
     setUserToBlock(id);
     setShowBlockModal(true);
   };
+
   const handleConfirmBlock = async () => {
     setActionLoading(true);
-    if (userToBlock) {
+    if (userToBlock && reason.trim()) {
       try {
         await axios.put(
           `http://localhost:8087/users/block/${userToBlock}`,
@@ -103,8 +106,8 @@ export default function CardTable({ color }) {
         setError(null);
       } catch (err) {
         if (err.response?.status === 401) {
-          const refreshed = await refreshTokenIfNeeded();
-          if (refreshed) handleConfirmBlock();
+          const newToken = await refreshAccessToken();
+          if (newToken) handleConfirmBlock();
         } else {
           setError(
             err.response?.data?.message ||
@@ -115,45 +118,6 @@ export default function CardTable({ color }) {
         setActionLoading(false);
         setShowBlockModal(false);
         setUserToBlock(null);
-        setReason("");
-      }
-    }
-  };
-
-  // Handle reject user
-  const handleRejectClick = (id) => {
-    setUserToReject(id);
-    setShowRejectModal(true);
-  };
-  const handleConfirmReject = async () => {
-    setActionLoading(true);
-    if (userToReject) {
-      try {
-        await axios.put(
-          `http://localhost:8087/users/rejetee/${userToReject}`,
-          { reason },
-          { headers: { Authorization: `Bearer ${user.accessToken}` } }
-        );
-        setUsers(
-          users.map((u) =>
-            u.id === userToReject ? { ...u, rejected: true } : u
-          )
-        );
-        setError(null);
-      } catch (err) {
-        if (err.response?.status === 401) {
-          const refreshed = await refreshTokenIfNeeded();
-          if (refreshed) handleConfirmReject();
-        } else {
-          setError(
-            err.response?.data?.message ||
-              "Erreur lors du rejet de l'utilisateur"
-          );
-        }
-      } finally {
-        setActionLoading(false);
-        setShowRejectModal(false);
-        setUserToReject(null);
         setReason("");
       }
     }
@@ -183,8 +147,8 @@ export default function CardTable({ color }) {
         setError(null);
       } catch (err) {
         if (err.response?.status === 401) {
-          const refreshed = await refreshTokenIfNeeded();
-          if (refreshed) handleConfirmUnblock();
+          const newToken = await refreshAccessToken();
+          if (newToken) handleConfirmUnblock();
         } else {
           setError(
             err.response?.data?.message ||
@@ -199,19 +163,108 @@ export default function CardTable({ color }) {
     }
   };
 
+  // Handle delete user
+  const handleDeleteClick = (id) => {
+    setUserToDelete(id);
+    setShowDeleteModal(true);
+  };
+  const handleConfirmDelete = async () => {
+    setActionLoading(true);
+    if (userToDelete) {
+      try {
+        await axios.delete(
+          `http://localhost:8087/users/delete/${userToDelete}`,
+          { headers: { Authorization: `Bearer ${user.accessToken}` } }
+        );
+        setUsers(users.filter((u) => u.id !== userToDelete));
+        setError(null);
+      } catch (err) {
+        if (err.response?.status === 401) {
+          const newToken = await refreshAccessToken();
+          if (newToken) {
+            handleConfirmDelete();
+            return;
+          }
+          setError("Session expirée, veuillez vous reconnecter");
+        } else {
+          setError(
+            err.response?.data?.message || "Erreur lors de la suppression de l'utilisateur"
+          );
+        }
+      } finally {
+        setActionLoading(false);
+        setShowDeleteModal(false);
+        setUserToDelete(null);
+      }
+    }
+  };
+
   // Handle cancel
   const handleCancel = () => {
     setShowBlockModal(false);
-    setShowRejectModal(false);
     setShowUnblockModal(false);
+    setShowDeleteModal(false);
     setUserToBlock(null);
-    setUserToReject(null);
     setUserToUnblock(null);
+    setUserToDelete(null);
     setReason("");
     setError(null);
+    setShowBulkDeleteModal(false);
   };
 
-  const filteredUsers = users.filter((u) => {
+  // Bulk selection handlers
+  const handleSelectUser = (id) => {
+    setSelectedUserIds((prev) =>
+      prev.includes(id) ? prev.filter((uid) => uid !== id) : [...prev, id]
+    );
+  };
+  const handleSelectAll = () => {
+    const allIds = filteredUsers.map((u) => u.id);
+    setSelectedUserIds((prev) =>
+      prev.length === allIds.length ? [] : allIds
+    );
+  };
+  const handleBulkDelete = () => setShowBulkDeleteModal(true);
+  const handleConfirmBulkDelete = async () => {
+    setActionLoading(true);
+    try {
+      await Promise.all(
+        selectedUserIds.map((id) =>
+          axios.delete(
+            `http://localhost:8087/users/delete/${id}`,
+            { headers: { Authorization: `Bearer ${user.accessToken}` } }
+          )
+        )
+      );
+      setUsers(users.filter((u) => !selectedUserIds.includes(u.id)));
+      setSelectedUserIds([]);
+      setError(null);
+    } catch (err) {
+      if (err.response?.status === 401) {
+        const newToken = await refreshAccessToken();
+        if (newToken) {
+          handleConfirmBulkDelete(); return;
+        }
+        setError("Session expirée, veuillez vous reconnecter");
+      } else {
+        setError(
+          err.response?.data?.message || "Erreur lors de la suppression des utilisateurs"
+        );
+      }
+    } finally {
+      setActionLoading(false);
+      setShowBulkDeleteModal(false);
+    }
+  };
+
+  // Pagination handlers
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+  };
+
+  // Filter and paginate users
+  // Basic text filtering
+  let filteredUsers = users.filter((u) => {
     const searchLower = searchTerm.toLowerCase();
     return (
       u.nom?.toLowerCase().includes(searchLower) ||
@@ -219,6 +272,25 @@ export default function CardTable({ color }) {
       u.email?.toLowerCase().includes(searchLower)
     );
   });
+  // Apply sorting by creation date
+  filteredUsers.sort((a, b) => {
+    // Use the displayDate field which is guaranteed to exist
+    const dateA = a.displayDate ? new Date(a.displayDate).getTime() : a.id;
+    const dateB = b.displayDate ? new Date(b.displayDate).getTime() : b.id;
+    
+    return sortOrder === "newest" ? dateB - dateA : dateA - dateB;
+  });
+
+  const totalPages = Math.ceil(filteredUsers.length / ITEMS_PER_PAGE);
+  const paginatedUsers = filteredUsers.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
+  // Reset to first page when search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
 
   if (authLoading) {
     return <div className="chargement">Chargement...</div>;
@@ -233,12 +305,20 @@ export default function CardTable({ color }) {
   }
 
   return (
-    <div
-      className={
-        "relative flex flex-col min-w-0 break-words w-full mb-6 shadow-lg rounded " +
-        (color === "light" ? "bg-white" : "bg-lightBlue-900 text-white")
-      }
+    <div className={`tableau-admin relative flex flex-col min-w-0 mb-6 rounded ${
+        color === "light" ? "bg-white" : "bg-lightBlue-900 text-white"
+      }`}
     >
+      {/* Bulk delete button */}
+      <div className="px-4 py-2">
+        <button
+          className="bouton-supprimer"
+          onClick={handleBulkDelete}
+          disabled={actionLoading || selectedUserIds.length === 0}
+        >
+          Supprimer sélectionnés ({selectedUserIds.length})
+        </button>
+      </div>
       {/* Add error display */}
       {error && (
         <div className="px-4 py-3 bg-red-100 text-red-700 rounded-t">
@@ -247,17 +327,17 @@ export default function CardTable({ color }) {
       )}
 
       <div className="rounded-t mb-0 px-4 py-3 border-0">
-        <div className="flex flex-wrap items-center">
-          <div className="relative w-full px-4 max-w-full flex-grow flex-1">
-            <h3
-              className={
-                "font-semibold text-lg " +
-                (color === "light" ? "text-blueGray-700" : "text-white")
-              }
-            >
-              Liste des utilisateurs
-            </h3>
-          </div>
+        <div className="flex flex-wrap items-center justify-between">
+           {/* Sorting toggle icon button */}
+           <div className="px-4 py-1 flex-shrink-0">
+             <button
+               onClick={() => setSortOrder((prev) => (prev === "newest" ? "oldest" : "newest"))}
+               className="bouton-tri ml-2"
+               title={sortOrder === "newest" ? "Trier du plus récent au plus ancien" : "Trier du plus ancien au plus récent"}
+             >
+               {sortOrder === "newest" ? "▼" : "▲"}
+             </button>
+           </div>
           {/* Add search input */}
           <div className="relative w-full px-4 max-w-full flex-grow flex-1">
             <input
@@ -268,13 +348,33 @@ export default function CardTable({ color }) {
               className="border-0 px-3 py-2 placeholder-blueGray-300 text-blueGray-600 relative bg-white rounded text-sm shadow outline-none focus:outline-none focus:ring w-full"
             />
           </div>
+          <div className="relative w-full px-4 max-w-full flex-grow flex-1">
+            <h3
+              className={
+                "font-semibold text-lg " +
+                (color === "light" ? "text-blueGray-700" : "text-white")
+              }
+            >
+              Liste des utilisateurs
+            </h3>
+          </div>
         </div>
       </div>
 
       <div className="block w-full overflow-x-auto">
-        <table className="items-center w-full bg-transparent border-collapse">
+        <table className="tableau-utilisateurs items-center w-full bg-transparent border-collapse">
           <thead>
             <tr>
+              <th className="px-4 py-2">
+                <input
+                  type="checkbox"
+                  onChange={handleSelectAll}
+                  checked={
+                    filteredUsers.length > 0 &&
+                    selectedUserIds.length === filteredUsers.length
+                  }
+                />
+              </th>
               <th
                 className={
                   "px-6 align-middle border border-solid py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left " +
@@ -284,6 +384,16 @@ export default function CardTable({ color }) {
                 }
               >
                 ID
+              </th>
+              <th
+                className={
+                  "px-6 align-middle border border-solid py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left " +
+                  (color === "light"
+                    ? "bg-blueGray-50 text-blueGray-500 border-blueGray-100"
+                    : "bg-lightBlue-800 text-lightBlue-300 border-lightBlue-700")
+                }
+              >
+                Date de création
               </th>
               <th
                 className={
@@ -358,10 +468,20 @@ export default function CardTable({ color }) {
             </tr>
           </thead>
           <tbody>
-            {filteredUsers.map((u) => (
+            {paginatedUsers.map((u, index) => (
               <tr key={u.id}>
+                <td className="px-4 py-2">
+                  <input
+                    type="checkbox"
+                    onChange={() => handleSelectUser(u.id)}
+                    checked={selectedUserIds.includes(u.id)}
+                  />
+                </td>
                 <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
-                  {u.id}
+                  {(currentPage - 1) * ITEMS_PER_PAGE + index + 1}
+                </td>
+                <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
+                  {u.displayDate ? new Date(u.displayDate).toLocaleDateString('fr-FR') : (new Date()).toLocaleDateString('fr-FR')}
                 </td>
                 <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
                   {u.nom}
@@ -389,13 +509,6 @@ export default function CardTable({ color }) {
                 </td>
                 <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-right">
                   <button
-                    className="bouton-activer"
-                    onClick={() => handleActivateClick(u.id)}
-                    disabled={actionLoading || u.active}
-                  >
-                    Activer
-                  </button>
-                  <button
                     className="bouton-bloquer"
                     onClick={() => handleBlockClick(u.id)}
                     disabled={actionLoading || u.blocked}
@@ -403,11 +516,11 @@ export default function CardTable({ color }) {
                     Bloquer
                   </button>
                   <button
-                    className="bouton-rejeter"
-                    onClick={() => handleRejectClick(u.id)}
-                    disabled={actionLoading || u.rejected}
+                    className="bouton-supprimer"
+                    onClick={() => handleDeleteClick(u.id)}
+                    disabled={actionLoading}
                   >
-                    Rejeter
+                    Supprimer
                   </button>
                   <button
                     className="bouton-debloquer"
@@ -423,7 +536,65 @@ export default function CardTable({ color }) {
         </table>
       </div>
 
-      {/* Modal for Block Action */}
+      {/* Pagination */}
+      <div className="px-4 py-3 flex items-center justify-between border-t border-gray-200">
+        <div className="flex-1 flex justify-between items-center">
+          <div>
+            <p className="text-sm text-gray-700">
+              Affichage de{" "}
+              <span className="font-medium">
+                {(currentPage - 1) * ITEMS_PER_PAGE + 1}
+              </span>{" "}
+              à{" "}
+              <span className="font-medium">
+                {Math.min(currentPage * ITEMS_PER_PAGE, filteredUsers.length)}
+              </span>{" "}
+              sur <span className="font-medium">{filteredUsers.length}</span> résultats
+            </p>
+          </div>
+          <div>
+            <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+              <button
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+                className={`relative inline-flex items-center px-2 py-2 rounded-l-md border ${
+                  currentPage === 1
+                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                    : "bg-white text-gray-500 hover:bg-gray-50"
+                } text-sm font-medium`}
+              >
+                Précédent
+              </button>
+              {[...Array(totalPages)].map((_, i) => (
+                <button
+                  key={i + 1}
+                  onClick={() => handlePageChange(i + 1)}
+                  className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
+                    currentPage === i + 1
+                      ? "z-10 bg-indigo-50 border-indigo-500 text-indigo-600"
+                      : "bg-white border-gray-300 text-gray-500 hover:bg-gray-50"
+                  }`}
+                >
+                  {i + 1}
+                </button>
+              ))}
+              <button
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className={`relative inline-flex items-center px-2 py-2 rounded-r-md border ${
+                  currentPage === totalPages
+                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                    : "bg-white text-gray-500 hover:bg-gray-50"
+                } text-sm font-medium`}
+              >
+                Suivant
+              </button>
+            </nav>
+          </div>
+        </div>
+      </div>
+
+      {/* Modals */}
       {showBlockModal && (
         <div className="modal">
           <div className="modal-content">
@@ -451,25 +622,19 @@ export default function CardTable({ color }) {
         </div>
       )}
 
-      {/* Modal for Reject Action */}
-      {showRejectModal && (
+      {/* Modal for Delete Action */}
+      {showDeleteModal && (
         <div className="modal">
           <div className="modal-content">
-            <h3>Confirmation du rejet</h3>
-            <p>Êtes-vous sûr de vouloir rejeter cet utilisateur ?</p>
-            <textarea
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
-              placeholder="Raison du rejet"
-              required
-            />
+            <h3>Confirmation de suppression</h3>
+            <p>Êtes-vous sûr de vouloir supprimer définitivement cet utilisateur ?</p>
             <div className="modal-actions">
               <button
                 className="bouton-confirmer"
-                onClick={handleConfirmReject}
-                disabled={actionLoading || !reason.trim()}
+                onClick={handleConfirmDelete}
+                disabled={actionLoading}
               >
-                {actionLoading ? "Rejet en cours..." : "Oui, rejeter"}
+                {actionLoading ? "Suppression en cours..." : "Oui, supprimer"}
               </button>
               <button className="bouton-annuler" onClick={handleCancel}>
                 Annuler
@@ -492,6 +657,31 @@ export default function CardTable({ color }) {
                 disabled={actionLoading}
               >
                 {actionLoading ? "Déblocage en cours..." : "Oui, débloquer"}
+              </button>
+              <button className="bouton-annuler" onClick={handleCancel}>
+                Annuler
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal for Bulk Delete */}
+      {showBulkDeleteModal && (
+        <div className="modal">
+          <div className="modal-content">
+            <h3>Confirmation de suppression multiple</h3>
+            <p>
+              Êtes-vous sûr de vouloir supprimer ces{" "}
+              {selectedUserIds.length} utilisateurs ?
+            </p>
+            <div className="modal-actions">
+              <button
+                className="bouton-confirmer"
+                onClick={handleConfirmBulkDelete}
+                disabled={actionLoading}
+              >
+                {actionLoading ? "Suppression en cours..." : "Oui, supprimer"}
               </button>
               <button className="bouton-annuler" onClick={handleCancel}>
                 Annuler

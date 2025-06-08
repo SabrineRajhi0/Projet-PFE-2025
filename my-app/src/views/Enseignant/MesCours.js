@@ -16,7 +16,7 @@ export default function ListeCours() {
         console.error("Erreur lors du parsing JSON :", error);
       }
     } else {
-      navigate("/login"); // Redirection si pas connecté
+      navigate("/auth/login"); // Redirection si pas connecté
     }
   }, [navigate]);
 

@@ -100,7 +100,7 @@ public class UserServiceImpl implements UserService {
 
 
 
-    /*@Override
+    @Override
 
     public void deleteUser(Long id) {
 
@@ -112,25 +112,7 @@ public class UserServiceImpl implements UserService {
 
         userRepository.deleteById(id);
 
-    }*/
-
-    @Override
-
-    public void deleteUser(Long id) {
-
-        User user = userRepository.findById(id)
-
-            .orElseThrow(() -> new accountNotFoundException("Utilisateur avec ID " + id + " non trouvé."));
-
-        
-
-        user.setStatus(UserStatus.DELETED); // Soft delete
-
-        userRepository.save(user);
-
     }
-
-
 
     @Override
 

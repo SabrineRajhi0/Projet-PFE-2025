@@ -3,17 +3,34 @@ import json
 import requests
 import re
 import fitz  # PyMuPDF
+import logging
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from dotenv import load_dotenv
+from werkzeug.utils import secure_filename
 
-# Charger la clé API depuis .env
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
+# Load environment variables
 load_dotenv()
 TOGETHER_API_KEY = os.getenv("TOGETHER_API_KEY")
+if not TOGETHER_API_KEY:
+    raise ValueError("TOGETHER_API_KEY not found in environment variables")
 
-# Initialisation de l'app Flask
+# Flask app configuration
 app = Flask(__name__)
 CORS(app)
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
+
+# File validation configuration
+ALLOWED_EXTENSIONS = {'pdf'}
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @app.route('/generate-quiz', methods=['POST'])
 def generate_quiz():
@@ -24,6 +41,9 @@ def generate_quiz():
 
     if file.filename == '':
         return jsonify({'error': 'No file selected'}), 400
+
+    if not allowed_file(file.filename):
+        return jsonify({'error': 'File type not allowed. Only PDF files are accepted.'}), 400
 
     try:
         # Lire le contenu du PDF et extraire le texte

@@ -176,7 +176,7 @@ const TableDropdown = ({ coursItem, showOnlyAfficher = false, onEdit }) => {
       {showOnlyAfficher ? (
         <button
           type="button"
-          className="flex items-center px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 font-medium rounded-md transition-colors shadow-sm"
+          className="flex items-center px-4 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 font-medium rounded-md transition-colors shadow-sm hover:shadow-md !important"
           onClick={handleAfficher}
           disabled={isLoading}
         >
@@ -185,50 +185,67 @@ const TableDropdown = ({ coursItem, showOnlyAfficher = false, onEdit }) => {
         </button>
       ) : (
         <>
-          <div className="relative inline-block text-left">
+          <div className="ellipsis-btn-container relative inline-block text-left">
             <button
               type="button"
-              className="text-slate-500 hover:text-slate-700 p-2 rounded-full hover:bg-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-300"
+              className="ellipsis-btn text-indigo-600 hover:text-indigo-800 p-3 rounded-full hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 transform hover:scale-110 active:scale-95 shadow-sm hover:shadow-md"
               ref={btnDropdownRef}
               onClick={() => setDropdownPopoverShow((prev) => !prev)}
               aria-expanded={dropdownPopoverShow}
               aria-haspopup="true"
             >
-              <i className="fas fa-ellipsis-v"></i>
+              <i className={`fas fa-ellipsis-v transition-transform duration-200 ${dropdownPopoverShow ? 'rotate-90' : ''}`}></i>
             </button>
 
           <div
             ref={popoverDropdownRef}
-            className={`${dropdownPopoverShow ? "block dropdown-menu" : "hidden"} bg-white text-base z-[1000] py-2 list-none text-left rounded-lg shadow-lg min-w-48 border border-slate-100`}
-            style={{ position: 'absolute', right: '0', top: '100%', marginTop: '4px', width: '180px', maxWidth: '95vw' }}
+            className={`${
+              dropdownPopoverShow ? "block dropdown-menu animate-fadeIn" : "hidden"
+            } dropdown-positioned bg-white text-base py-2 list-none text-left rounded-lg shadow-xl w-52 border border-gray-200 backdrop-blur-sm`}
+            style={{
+              position: 'absolute',
+              right: '0',
+              top: '100%',
+              marginTop: '0.5rem',
+              zIndex: 99999,
+              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+              border: '1px solid rgba(229, 231, 235, 0.8)',
+              background: 'rgba(255, 255, 255, 0.95)'
+            }}
           >
             <button
               type="button"
-              className="flex w-full items-center px-4 py-2.5 hover:bg-slate-50 text-slate-700 font-medium transition-colors"
+              className="action-btn edit-btn flex w-full items-center px-4 py-3 text-sm text-amber-700 hover:text-amber-800 bg-gradient-to-r from-amber-50 to-orange-50 hover:from-amber-100 hover:to-orange-100 font-medium transition-all duration-200 ease-in-out transform hover:scale-[1.02] group border-b border-amber-100 last:border-b-0"
               onClick={() => handleEditClick(coursItem)}
             >
-              <i className="fas fa-edit text-yellow-500 mr-3 w-4 text-center"></i>
-              Éditer
+              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-amber-100 group-hover:bg-amber-200 mr-3 transition-colors duration-200">
+                <i className="fas fa-edit text-amber-600 text-sm transition-transform group-hover:scale-110"></i>
+              </div>
+              <span className="font-medium">Éditer le cours</span>
             </button>
 
             <button
               type="button"
-              className="flex w-full items-center px-4 py-2.5 hover:bg-slate-50 text-slate-700 font-medium transition-colors"
+              className="action-btn view-btn flex w-full items-center px-4 py-3 text-sm text-indigo-700 hover:text-indigo-800 bg-gradient-to-r from-indigo-50 to-blue-50 hover:from-indigo-100 hover:to-blue-100 font-medium transition-all duration-200 ease-in-out transform hover:scale-[1.02] group border-b border-indigo-100 last:border-b-0"
               onClick={() => handleNavigateToEditCour(coursItem)}
               disabled={isLoading}
             >
-              <i className="far fa-eye text-blue-500 mr-3 w-4 text-center"></i>
-              {isLoading ? "Chargement..." : "Afficher"}
+              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-indigo-100 group-hover:bg-indigo-200 mr-3 transition-colors duration-200">
+                <i className="far fa-eye text-indigo-600 text-sm transition-transform group-hover:scale-110"></i>
+              </div>
+              <span className="font-medium">{isLoading ? "Chargement..." : "Consulter"}</span>
             </button>
 
             <button
               type="button"
-              className="flex w-full items-center px-4 py-2.5 hover:bg-red-50 text-slate-700 font-medium transition-colors"
+              className="action-btn delete-btn flex w-full items-center px-4 py-3 text-sm text-rose-700 hover:text-rose-800 bg-gradient-to-r from-rose-50 to-red-50 hover:from-rose-100 hover:to-red-100 font-medium transition-all duration-200 ease-in-out transform hover:scale-[1.02] group border-b border-rose-100 last:border-b-0"
               onClick={() => handleDeleteCours(coursItem.idespac)}
               disabled={isLoading}
             >
-              <i className="fas fa-trash-alt text-red-500 mr-3 w-4 text-center"></i>
-              Supprimer
+              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-rose-100 group-hover:bg-rose-200 mr-3 transition-colors duration-200">
+                <i className="fas fa-trash-alt text-rose-600 text-sm transition-transform group-hover:scale-110"></i>
+              </div>
+              <span className="font-medium">Supprimer</span>
             </button>
           </div>
           </div>
