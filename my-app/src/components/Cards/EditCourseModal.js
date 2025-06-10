@@ -1,68 +1,225 @@
-// src/components/Modals/EditCourseModal.js
-import React from "react";
+import React, { useEffect, useRef } from "react";
+import {
+  Modal,
+  Box,
+  Typography,
+  TextField,
+  Button,
+  IconButton,
+  Fade,
+  Backdrop,
+} from "@mui/material";
+import {
+  Close as CloseIcon,
+  Book as BookIcon,
+  Save as SaveIcon,
+} from "@mui/icons-material";
 
 const EditCourseModal = ({ isOpen, onClose, course, onSave }) => {
-  if (!isOpen || !course) return null;
+  const modalRef = useRef(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+      modalRef.current?.focus();
+    } else {
+      document.body.style.overflow = "auto";
+    }
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [isOpen]);
+
+  // Prevent rendering if modal is not open or course is invalid
+  if (!isOpen || !course || typeof course !== "object") {
+    return null;
+  }
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const updatedCours = {
+    const updatedCourse = {
       ...course,
-      titre: e.target.titre.value,
-      description: e.target.description.value,
+      titre: e.target.titre?.value || course.titre || "",
+      description: e.target.description?.value || course.description || "",
     };
-    onSave(updatedCours);
+    if (onSave && typeof onSave === "function") {
+      onSave(updatedCourse);
+    }
+    onClose();
+  };
+
+  const handleClose = () => {
+    if (onClose && typeof onClose === "function") {
+      onClose();
+    }
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-2xl w-full max-w-md mx-auto overflow-hidden transform transition-all sm:my-8 sm:align-middle">
-        <div className="flex justify-between items-center bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-4">
-          <h2 className="text-xl font-semibold">Éditer le cours</h2>
-          <button onClick={onClose} className="text-blue-100 hover:text-white transition-colors">
-            <i className="fas fa-times fa-lg"></i>
-          </button>
-        </div>
-        <form onSubmit={handleSubmit} className="p-6 space-y-6 bg-gray-50">
-          <div>
-            <label htmlFor="titre" className="block text-sm font-medium text-gray-700 mb-1">Titre</label>
-            <input
+    <Modal
+      open={isOpen}
+      onClose={handleClose}
+      closeAfterTransition
+      slots={{ backdrop: Backdrop }}
+      slotProps={{
+        backdrop: {
+          timeout: 500,
+          sx: { bgcolor: "rgba(0, 0, 0, 0.8)" },
+        },
+      }}
+      aria-labelledby="modal-headline"
+    >
+      <Fade in={isOpen}>
+        <Box
+          ref={modalRef}
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: { xs: "90%", sm: 450 },
+            maxWidth: 450,
+            bgcolor: "background.paper",
+            boxShadow: 24,
+            borderRadius: 3,
+            overflow: "hidden",
+            outline: "none",
+          }}
+        >
+          {/* Header */}
+          <Box
+            sx={{
+              bgcolor: "primary.main",
+              p: 2.5,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+              <BookIcon sx={{ color: "white" }} />
+              <Typography
+                id="modal-headline"
+                variant="h6"
+                sx={{ color: "white", fontWeight: 600 }}
+              >
+                Edit Course
+              </Typography>
+            </Box>
+            <IconButton
+              onClick={handleClose}
+              sx={{ color: "white", "&:hover": { bgcolor: "primary.dark" } }}
+              aria-label="Close"
+            >
+              <CloseIcon />
+            </IconButton>
+          </Box>
+
+          {/* Form body */}
+          <Box
+            component="form"
+            onSubmit={handleSubmit}
+            sx={{
+              p: 3,
+              bgcolor: "grey.50",
+              display: "flex",
+              flexDirection: "column",
+              gap: 3,
+            }}
+          >
+            <TextField
               id="titre"
               name="titre"
-              defaultValue={course.titre}
-              className="w-full border-gray-300 rounded-md shadow-sm px-4 py-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-              placeholder="Titre du cours"
+              label="Course Title"
+              defaultValue={course.titre || ""}
+              required
+              fullWidth
+              variant="outlined"
+              InputProps={{
+                endAdornment: <BookIcon sx={{ color: "grey.400" }} />,
+              }}
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: 2,
+                  "&:hover fieldset": { borderColor: "primary.main" },
+                  "&.Mui-focused fieldset": { borderColor: "primary.main" },
+                },
+              }}
             />
-          </div>
-          <div>
-            <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-            <textarea
+
+            <TextField
               id="description"
               name="description"
-              defaultValue={course.description}
-              rows={4}
-              className="w-full border-gray-300 rounded-md shadow-sm px-4 py-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-              placeholder="Description détaillée du cours"
+              label="Description"
+              defaultValue={course.description || ""}
+              multiline
+              rows={5}
+              fullWidth
+              variant="outlined"
+              InputProps={{
+                endAdornment: (
+                  <Box sx={{ alignSelf: "flex-start", pt: 1 }}>
+                    <BookIcon sx={{ color: "grey.400" }} />
+                  </Box>
+                ),
+              }}
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: 2,
+                  "&:hover fieldset": { borderColor: "primary.main" },
+                  "&.Mui-focused fieldset": { borderColor: "primary.main" },
+                },
+              }}
             />
-          </div>
-          <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
+
+            {/* Footer */}
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "flex-end",
+                gap: 2,
+                pt: 2,
+                borderTop: 1,
+                borderColor: "grey.200",
+              }}
             >
-              Annuler
-            </button>
-            <button
-              type="submit"
-              className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
-            >
-              Sauvegarder
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+              <Button
+                onClick={handleClose}
+                variant="outlined"
+                startIcon={<CloseIcon />}
+                sx={{
+                  borderRadius: 2,
+                  textTransform: "none",
+                  fontWeight: 500,
+                  px: 3,
+                  py: 1,
+                  color: "text.primary",
+                  borderColor: "grey.300",
+                  "&:hover": { bgcolor: "grey.100", borderColor: "grey.400" },
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                variant="contained"
+                startIcon={<SaveIcon />}
+                sx={{
+                  borderRadius: 2,
+                  textTransform: "none",
+                  fontWeight: 500,
+                  px: 3,
+                  py: 1,
+                  bgcolor: "primary.main",
+                  "&:hover": { bgcolor: "primary.dark" },
+                }}
+              >
+                Save
+              </Button>
+            </Box>
+          </Box>
+        </Box>
+      </Fade>
+    </Modal>
   );
 };
 
