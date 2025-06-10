@@ -68,7 +68,16 @@ public class FileUploadConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        // Configure resource handler for uploads directory
         registry.addResourceHandler("/uploads/**")
-                .addResourceLocations("classpath:/uploads/");
+                .addResourceLocations("file:uploads/")
+                .setCachePeriod(3600)
+                .resourceChain(true);
+        
+        // Also add classpath location as fallback
+        registry.addResourceHandler("/uploads/**")
+                .addResourceLocations("classpath:/uploads/")
+                .setCachePeriod(3600)
+                .resourceChain(true);
     }
 } 
