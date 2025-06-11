@@ -14,7 +14,7 @@ import {
   DialogActions,
   Snackbar,
   Alert,
-  CircularProgress
+  CircularProgress,
 } from "@mui/material";
 import { useLocation, useNavigate } from "react-router-dom";
 
@@ -25,7 +25,8 @@ const QuizPage = () => {
   const [timer, setTimer] = useState(20);
   const [showResult, setShowResult] = useState(false);
   const [score, setScore] = useState(0);
-  const location = useLocation();  const [quizData, setQuizData] = useState(null);
+  const location = useLocation();
+  const [quizData, setQuizData] = useState(null);
   const navigate = useNavigate();
   const [showLoginDialog, setShowLoginDialog] = useState(false);
   // const hasInitialized = useRef(false); // Commented out as it's not being used
@@ -101,7 +102,7 @@ const QuizPage = () => {
 
       return () => clearInterval(interval);
     }
-  }, [currentQuestionIndex, showResult, quizData, handleNext]);
+  }, [currentQuestionIndex, showResult, quizData]);
 
   const handleNext = () => {
     if (!quizData || !quizData[currentQuestionIndex]) return;
