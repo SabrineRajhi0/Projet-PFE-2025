@@ -88,10 +88,21 @@ export default function Sidebar() {
 
             {/* Divider */}
             <hr className="my-4 md:min-w-full" />
-            {/* Heading */}
-            <h6 className="md:min-w-full text-blueGray-500 text-xs uppercase font-bold block pt-1 pb-4 no-underline">
-              Admin Layout Pages
-            </h6>
+            {normalizedRole === 'admin' && (
+              <h6 className="md:min-w-full text-blueGray-500 text-xs uppercase font-bold block pt-1 pb-4 no-underline">
+                Admin Layout Pages
+              </h6>
+            )}
+            {normalizedRole === 'enseignant' && (
+              <h6 className="md:min-w-full text-blueGray-500 text-xs uppercase font-bold block pt-1 pb-4 no-underline">
+                Enseignant Layout Pages
+              </h6>
+            )}
+            {normalizedRole === 'apprenant' && (
+              <h6 className="md:min-w-full text-blueGray-500 text-xs uppercase font-bold block pt-1 pb-4 no-underline">
+                Apprenant Layout Pages
+              </h6>
+            )}
             {/* Navigation */}
 
             <ul className="md:flex-col md:min-w-full flex flex-col list-none">
@@ -181,6 +192,70 @@ export default function Sidebar() {
                         }
                       ></i>{" "}
                       Mes Cours
+                    </Link>
+                  </li>
+                  <li className="items-center">
+                    <Link
+                      className={
+                        "text-xs uppercase py-3 font-bold block " +
+                        (window.location.href.includes("/admin/niveaux")
+                          ? "text-lightBlue-500 hover:text-lightBlue-600"
+                          : "text-blueGray-700 hover:text-blueGray-500")
+                      }
+                      to="/admin/niveaux"
+                    >
+                      <i
+                        className={
+                          "fas fa-layer-group mr-2 text-sm " +
+                          (window.location.href.includes("/admin/niveau")
+                            ? "opacity-75"
+                            : "text-blueGray-300")
+                        }
+                      ></i>{" "}
+                      Niveaux
+                    </Link>
+                  </li>
+                  <li className="items-center">
+                    <Link
+                      className={
+                        "text-xs uppercase py-3 font-bold block " +
+                        (window.location.href.includes("/admin/chapitre")
+                          ? "text-lightBlue-500 hover:text-lightBlue-600"
+                          : "text-blueGray-700 hover:text-blueGray-500")
+                      }
+                      to="/admin/chapitre"
+                    >
+                      <i
+                        className={
+                          "fas fa-book-open mr-2 text-sm " +
+                          (window.location.href.includes("/admin/chapitre")
+                            ? "opacity-75"
+                            : "text-blueGray-300")
+                        }
+                      ></i>{" "}
+                      Chapitre
+                    </Link>
+                  </li>
+                  {/* Profile Link */}
+                  <li className="items-center">
+                    <Link
+                      className={
+                        "text-xs uppercase py-3 font-bold block " +
+                        (window.location.href.includes("/admin/profile")
+                          ? "text-lightBlue-500 hover:text-lightBlue-600"
+                          : "text-blueGray-700 hover:text-blueGray-500")
+                      }
+                      to="/admin/profile"
+                    >
+                      <i
+                        className={
+                          "fas fa-user mr-2 text-sm " +
+                          (window.location.href.includes("/admin/profile")
+                            ? "opacity-75"
+                            : "text-blueGray-300")
+                        }
+                      ></i>{" "}
+                      Mon Profil
                     </Link>
                   </li>
                 </>

@@ -1,6 +1,6 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import "assets/styles/tailwind.css";
@@ -27,31 +27,139 @@ import ViewCours from "views/Apprenant/ViewCours.js";
 import QuizPage from "views/QuizPage.js";
 import NotFoundPage from "views/PageNotFound/NotFoundPage.js";
 
+const router = createBrowserRouter(
+  [
+    {
+      path: "/",
+      element: (
+        <AuthProvider>
+          <>
+            <ToastContainer />
+            <Index />
+          </>
+        </AuthProvider>
+      ),
+    },
+    {
+      path: "/auth/*",
+      element: (
+        <AuthProvider>
+          <>
+            <ToastContainer />
+            <Auth />
+          </>
+        </AuthProvider>
+      ),
+    },
+    {
+      path: "/admin/*",
+      element: (
+        <AuthProvider>
+          <>
+            <ToastContainer />
+            <Admin />
+          </>
+        </AuthProvider>
+      ),
+    },
+    {
+      path: "/enseignant",
+      element: (
+        <AuthProvider>
+          <>
+            <ToastContainer />
+            <Enseignant />
+          </>
+        </AuthProvider>
+      ),
+    },
+    {
+      path: "/apprenant",
+      element: (
+        <AuthProvider>
+          <>
+            <ToastContainer />
+            <Apprenant />
+          </>
+        </AuthProvider>
+      ),
+    },
+    {
+      path: "/apprenant/cours/:id",
+      element: (
+        <AuthProvider>
+          <>
+            <ToastContainer />
+            <ViewCours />
+          </>
+        </AuthProvider>
+      ),
+    },
+    {
+      path: "/landing",
+      element: (
+        <AuthProvider>
+          <>
+            <ToastContainer />
+            <Landing />
+          </>
+        </AuthProvider>
+      ),
+    },
+    {
+      path: "/profile",
+      element: (
+        <AuthProvider>
+          <>
+            <ToastContainer />
+            <Profile />
+          </>
+        </AuthProvider>
+      ),
+    },
+    {
+      path: "/choisir",
+      element: (
+        <AuthProvider>
+          <>
+            <ToastContainer />
+            <Choisir />
+          </>
+        </AuthProvider>
+      ),
+    },
+    {
+      path: "/quiz",
+      element: (
+        <AuthProvider>
+          <>
+            <ToastContainer />
+            <QuizPage />
+          </>
+        </AuthProvider>
+      ),
+    },
+    {
+      path: "*",
+      element: (
+        <AuthProvider>
+          <>
+            <ToastContainer />
+            <NotFoundPage />
+          </>
+        </AuthProvider>
+      ),
+    },
+  ],
+  {
+    future: {
+      v7_startTransition: true,
+      v7_relativeSplatPath: true
+    }
+  }
+);
+
 const root = createRoot(document.getElementById("root"));
 root.render(
-  <BrowserRouter>
-    <AuthProvider>
-      <Routes>
-        {/* add routes with layouts: all /admin/* routes go through Admin layout */}
-        <Route path="/auth/*" element={<Auth />} />
-        <Route path="/admin/*" element={<Admin />} />
-
-        {/* standalone dashboards for Enseignant & Apprenant */}
-        <Route path="/enseignant" element={<Enseignant />} />
-        <Route path="/apprenant" element={<Apprenant />} />
-        <Route path="/apprenant/cours/:id" element={<ViewCours />} />
-
-        {/* add routes without layouts */}
-        <Route path="/landing" element={<Landing />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/" element={<Index />} />
-        <Route path="/choisir" element={<Choisir />} />
-
-        <Route path="/quiz" element={<QuizPage />} />
-        {/* catch-all route */}
-        <Route path="*" exact={true} element={<NotFoundPage />} />
-      </Routes>
-      <ToastContainer />
-    </AuthProvider>
-  </BrowserRouter>
+  <RouterProvider router={router} />
 );

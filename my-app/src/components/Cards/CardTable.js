@@ -7,7 +7,7 @@ import { AuthContext } from "views/auth/AuthContext";
 // Pagination constants
 const ITEMS_PER_PAGE = 10;
 
-export default function CardTable({ color }) {
+export default function CardTable({ color = "light" }) {
   const {
     user,
     loading: authLoading,
@@ -693,10 +693,6 @@ export default function CardTable({ color }) {
     </div>
   );
 }
-
-CardTable.defaultProps = {
-  color: "light",
-};
 
 CardTable.propTypes = {
   color: PropTypes.oneOf(["light", "dark"]),
