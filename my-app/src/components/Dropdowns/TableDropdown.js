@@ -36,176 +36,69 @@ const TableDropdown = ({ coursItem, onEdit }) => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [dropdownPopoverShow]);
+  const afficherItemCour = async (id) => {
+    setIsLoading(true);
+    try {
+      const token = localStorage.getItem("accessToken");
+      if (!token) throw new Error("Token manquant");
 
-  // Fonction pour afficher la modale avec une liste statique d'éléments
-  const handleOpenModal = () => {
-    setDropdownPopoverShow(false); // Ferme le menu déroulant si ouvert
+      // First fetch the espaceCours by ID
+      const response = await axios.get(
+        `http://localhost:8087/api/element/v1/getByEspaceCoursId/${id}`
+      );
+      const element = response.data;
+      console.log(element);
+      // Check if it's a PDF (you might need to adjust this check based on your data structure)
+      // Construct the full URL to the PDF file on your server
+      if (element) {
+        const pdfUrl = `http://localhost:8087/${element.cheminElt}`;
 
-    // Vérifier si l'utilisateur est admin
-    const user = JSON.parse(localStorage.getItem("user"));
-    const isAdmin = user?.roles?.includes("ROLE_ADMIN") || false;
-
-    // Données statiques pour la liste d'éléments
-    const staticElements = [
-      {
-        date_ajout_ec: "2025-06-01T10:00:00",
-        ordreec: 1,
-        visibleec: true,
-        id_elt: 101,
-        id_espc: 201,
-        idec: 301,
-        date_limite: "2025-06-15T23:59:00",
-        cheminElt: "files/maths.pdf",
-      },
-      {
-        date_ajout_ec: "2025-06-02T14:30:00",
-        ordreec: 2,
-        visibleec: false,
-        id_elt: 102,
-        id_espc: 202,
-        idec: 302,
-        date_limite: "2025-06-20T23:59:00",
-        cheminElt: null, // Simule un élément sans fichier
-      },
-      {
-        date_ajout_ec: "2025-06-03T09:15:00",
-        ordreec: 3,
-        visibleec: true,
-        id_elt: 103,
-        id_espc: 203,
-        idec: 303,
-        date_limite: "2025-06-25T23:59:00",
-        cheminElt: "files/chemistry.pdf",
-      },
-    ];
-
-    // Filtrer les éléments pour les non-admins (visibleec: true uniquement)
-    const filteredElements = isAdmin
-      ? staticElements
-      : staticElements.filter((element) => element.visibleec);
-
-    // Fonction pour formater les dates
-    const formatDate = (date) => {
-      if (!date) return "Non défini";
-      try {
-        const parsedDate = new Date(date);
-        return parsedDate.toLocaleString("fr-FR", {
-          day: "2-digit",
-          month: "2-digit",
-          year: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-        });
-      } catch {
-        return "Date invalide";
-      }
-    };
-
-    // Fonction pour ouvrir l'élément cliqué
-    const handleRowClick = (cheminElt) => {
-      if (cheminElt) {
-        const fileUrl = `http://localhost:8087/${cheminElt}`;
-        window.open(fileUrl, "_blank");
+        // Open the PDF in a new tab
+        window.open(pdfUrl, "_blank");
       } else {
+        // For non-PDF content, show a preview or download
         Swal.fire({
-          icon: "warning",
-          title: "Fichier introuvable",
-          text: "Le fichier est manquant pour cet élément.",
-          confirmButtonColor: "#3085d6",
+          title: "Contenu du cours",
+          html: `
+          <div class="text-left p-4">
+
+            <p class="mb-2 text-gray-700">${
+              element.desElt || "Aucune description disponible"
+            }</p>
+            <div class="mt-4">
+              <a href="http://localhost:8087/${element.cheminElt}" 
+                 class="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+                 download>
+                <i class="fas fa-download mr-2"></i>
+                Télécharger le fichier
+              </a>
+            </div>
+          </div>
+        `,
+          confirmButtonText: "Fermer",
+          customClass: {
+            popup: "rounded-lg shadow-xl",
+            confirmButton:
+              "bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-md",
+          },
         });
       }
-    };
-
-    // Génération du HTML pour la modale avec un tableau
-    const modalContent = `
-    <div style="display: flex; flex-direction: column; gap: 1.5rem; text-align: left; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;">
-      <h3 style="margin: 0; font-size: 1.75rem; font-weight: 700; color: #111827;">
-        Liste des Éléments
-      </h3>
-      <div style="overflow-x: auto; border-radius: 0.75rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.05);">
-        <table style="width: 100%; border-collapse: collapse; background-color: #ffffff;">
-          <thead>
-            <tr style="background-color: #f3f4f6; color: #374151; font-weight: 600; font-size: 0.9rem;">
-              <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #e5e7eb;">Date d'ajout</th>
-              <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #e5e7eb;">Ordre</th>
-              <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #e5e7eb;">Visibilité</th>
-              <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #e5e7eb;">ID Élément</th>
-              <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #e5e7eb;">ID Espace Cours</th>
-              <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #e5e7eb;">ID EC</th>
-              <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #e5e7eb;">Date limite</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${
-              filteredElements.length > 0
-                ? filteredElements
-                    .map(
-                      (element, index) => `
-                    <tr 
-                      style="cursor: pointer; background-color: ${
-                        index % 2 === 0 ? "#fafafa" : "#ffffff"
-                      }; transition: background-color 0.2s;"
-                      onmouseover="this.style.backgroundColor='#f1f5f9'"
-                      onmouseout="this.style.backgroundColor='${
-                        index % 2 === 0 ? "#fafafa" : "#ffffff"
-                      }'"
-                      onclick="Swal.getPopup().dispatchEvent(new CustomEvent('row-click', { detail: '${
-                        element.cheminElt || ""
-                      }' }))"
-                    >
-                      <td style="padding: 1rem; color: #111827; font-size: 0.875rem;">${formatDate(
-                        element.date_ajout_ec
-                      )}</td>
-                      <td style="padding: 1rem; color: #111827; font-size: 0.875rem;">${
-                        element.ordreec
-                      }</td>
-                      <td style="padding: 1rem; color: #111827; font-size: 0.875rem;">${
-                        element.visibleec ? "Visible" : "Non visible"
-                      }</td>
-                      <td style="padding: 1rem; color: #111827; font-size: 0.875rem;">${
-                        element.id_elt
-                      }</td>
-                      <td style="padding: 1rem; color: #111827; font-size: 0.875rem;">${
-                        element.id_espc
-                      }</td>
-                      <td style="padding: 1rem; color: #111827; font-size: 0.875rem;">${
-                        element.idec
-                      }</td>
-                      <td style="padding: 1rem; color: #111827; font-size: 0.875rem;">${formatDate(
-                        element.date_limite
-                      )}</td>
-                    </tr>
-                  `
-                    )
-                    .join("")
-                : `<tr><td colspan="7" style="padding: 1rem; text-align: center; color: #6b7280;">Aucun élément visible disponible.</td></tr>`
-            }
-          </tbody>
-        </table>
-      </div>
-    </div>
-  `;
-
-    Swal.fire({
-      title: "Liste des Éléments",
-      html: modalContent,
-      confirmButtonText: "Fermer",
-      confirmButtonColor: "#2563eb",
-      width: "800px",
-      customClass: {
-        popup: "rounded-xl shadow-xl",
-        title: "text-2xl font-bold text-gray-900",
-        confirmButton:
-          "px-6 py-2 text-white font-semibold rounded-md bg-blue-600 hover:bg-blue-700 transition-colors",
-      },
-      didOpen: () => {
-        // Ajouter un écouteur d'événements pour les clics sur les lignes
-        const popup = Swal.getPopup();
-        popup.addEventListener("row-click", (e) => {
-          handleRowClick(e.detail);
-        });
-      },
-    });
+    } catch (err) {
+      Swal.fire({
+        title: "Erreur",
+        text:
+          "Impossible d'afficher le cours: " +
+          (err.response?.data?.message || err.message),
+        icon: "error",
+        timer: 3000,
+        customClass: {
+          popup: "rounded-lg shadow-xl",
+        },
+      });
+    } finally {
+      setIsLoading(false);
+      setDropdownPopoverShow(false);
+    }
   };
   const handleEditClick = (course) => {
     setDropdownPopoverShow(false);
@@ -386,7 +279,7 @@ const TableDropdown = ({ coursItem, onEdit }) => {
               <button
                 type="button"
                 className="action-btn edit-btn flex w-full items-center px-4 py-3 text-sm text-amber-700 hover:text-amber-800 bg-gradient-to-r from-amber-50 to-orange-50 hover:from-amber-100 hover:to-orange-100 font-medium transition-all duration-200 ease-in-out transform hover:scale-[1.02] group border-b border-amber-100 last:border-b-0"
-                onClick={handleOpenModal}
+                onClick={() => afficherItemCour(coursItem.idespac)}
                 disabled={isLoading}
               >
                 <div className="flex items-center justify-center w-8 h-8 rounded-full bg-indigo-100 hover:bg-indigo-200 mr-3 transition-colors duration-200">
@@ -429,7 +322,7 @@ const TableDropdown = ({ coursItem, onEdit }) => {
         <button
           type="button"
           className="flex items-center px-4 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 font-medium rounded-md transition-colors shadow-sm hover:shadow-md"
-          onClick={handleOpenModal}
+          onClick={() => afficherItemCour(coursItem.idespac)}
           disabled={isLoading}
         >
           <i className="far fa-eye mr-2"></i>
