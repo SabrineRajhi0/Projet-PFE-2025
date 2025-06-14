@@ -12,8 +12,6 @@ function Choisir() {
   const [loadingMessage, setLoadingMessage] = useState("");
   const navigate = useNavigate();
 
-  const TOGETHER_API_KEY = "tgp_v1_H3nzZUCQpGjTmuP-INDT9lWbYwCeSRz-SQADNlnCjSI"; // Remplacez par votre clé Together API
-
   // Fetch data from the backend
   useEffect(() => {
     fetch("http://localhost:8087/api/choisir/niveaux-chapitres")
@@ -126,25 +124,31 @@ function Choisir() {
       try {
         setIsLoading(true);
         setLoadingProgress(0);
-        setLoadingMessage("Initialisation...");        console.log("Fetching elements for chapter ID:", selectedChapitre.espaceCours.idespac);
+        setLoadingMessage("Initialisation...");
+        console.log(
+          "Fetching elements for chapter ID:",
+          selectedChapitre.espaceCours.idespac
+        );
         const response = await fetchElementByidespac(
           selectedChapitre.espaceCours.idespac
         );
-        
+
         console.log("Backend response:", response);
 
         // Ensure we have an array to work with
         const elements = Array.isArray(response) ? response : [response];
-        
+
         if (!elements || elements.length === 0) {
           throw new Error("Aucun élément trouvé pour ce chapitre.");
         }
 
         // Find the first PDF element
-        const pdfElement = elements.find(element => 
-          element && element.cheminElt && 
-          typeof element.cheminElt === 'string' && 
-          element.cheminElt.toLowerCase().endsWith('.pdf')
+        const pdfElement = elements.find(
+          (element) =>
+            element &&
+            element.cheminElt &&
+            typeof element.cheminElt === "string" &&
+            element.cheminElt.toLowerCase().endsWith(".pdf")
         );
 
         if (pdfElement?.cheminElt) {

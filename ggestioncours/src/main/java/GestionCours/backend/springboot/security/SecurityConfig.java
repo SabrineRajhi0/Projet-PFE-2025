@@ -92,7 +92,7 @@ public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Excepti
                 
                 // Espace Cours endpoints
                 .requestMatchers("/api/espaceCours/tablcour").permitAll()
-                .requestMatchers("/api/espacecours/getAllespacecours").permitAll()
+                .requestMatchers("/api/espaceCours/getAllEspaceCours").permitAll()
                 
                 // Element endpoints - most specific first
                 .requestMatchers("/api/element/v1/getByEspaceCoursId/**").permitAll()
@@ -103,9 +103,26 @@ public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Excepti
                 // This catch-all for /api/element/** should come last
                 .requestMatchers("/api/element/**").hasAnyRole("APPRENANT", "ENSEIGNANT", "ADMIN")
                
-                .requestMatchers("/api/espacecours/getAllespacecours").hasAnyRole("APPRENANT", "ENSEIGNANT", "ADMIN")
+                .requestMatchers("/api/espaceCours/getAllEspaceCours").hasAnyRole("APPRENANT", "ENSEIGNANT", "ADMIN")
                  
                 .requestMatchers("/users/all").hasRole("ADMIN") // Restrict /users/all to ADMIN
+
+                .requestMatchers("/api/chapitre/getAllChapitres").permitAll()
+                .requestMatchers("/api/chapitre/addchapitre").permitAll()
+                .requestMatchers("/api/chapitre/getChapitre/**").permitAll()
+                .requestMatchers("/api/chapitre/updatechapitre/**").permitAll()
+                .requestMatchers("/api/chapitre/deleteChapitre/**").permitAll()
+                
+
+                 .requestMatchers("/api/niveau/getAllNiveau").permitAll()
+                  .requestMatchers("/api/niveau/addNiveau").permitAll()
+                   .requestMatchers("/api/niveau/getNiveau/**").permitAll()
+                   .requestMatchers("/api/niveau/updateNiveau/**").permitAll()
+                   .requestMatchers("/api/niveau/deleteNiveau/**").permitAll()
+                  
+
+
+                
 
                 .requestMatchers("/users/activate/**").hasRole("ADMIN") // Restrict activate endpoint
 

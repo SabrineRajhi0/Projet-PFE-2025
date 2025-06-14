@@ -18,6 +18,7 @@ import Profile from "views/Profile.js";
 import Index from "views/Index.js";
 import Choisir from "views/Choisir.js";
 
+
 import { AuthProvider } from "./views/auth/AuthContext.js";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";

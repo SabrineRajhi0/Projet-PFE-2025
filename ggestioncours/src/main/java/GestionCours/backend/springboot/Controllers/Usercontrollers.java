@@ -27,6 +27,19 @@ public class Usercontrollers {
     @Autowired
     private UserService userService;
 
+    @PreAuthorize("hasRole('ADMIN') or authentication.principal.id == #id")
+@PutMapping("/{id}")
+public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User userDetails) {
+    try {
+        User updatedUser = userService.updateUser(id, userDetails);
+        return ResponseEntity.ok(updatedUser);
+    } catch (accountNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+    } catch (Exception ex) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+    }
+}
+
     // Récupérer tous les utilisateurs (réservé aux admins)
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/all")
@@ -55,6 +68,8 @@ public class Usercontrollers {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
+
+
 
     @GetMapping("/findById/{userId}")
     public ResponseEntity<User> findById(@PathVariable long userId) {
@@ -153,4 +168,9 @@ public class Usercontrollers {
                    .body(Map.of("error", ex.getMessage()));
         }
     }
+
+
+
+
+
 }

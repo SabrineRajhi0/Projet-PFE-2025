@@ -19,13 +19,6 @@ const Dashboard = () => {
     }
   }, [navigate]);
 
-  const handleLogout = () => {
-    localStorage.removeItem('user');
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-    navigate('/accueil');
-  };
-
   const getNormalizedRole = (roles) => {
     if (!roles || !Array.isArray(roles)) return null;
     if (roles.includes('ROLE_ADMIN')) return 'admin';

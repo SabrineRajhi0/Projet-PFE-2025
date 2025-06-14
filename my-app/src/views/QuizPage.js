@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useCallback } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -29,7 +29,6 @@ const QuizPage = () => {
   const [quizData, setQuizData] = useState(null);
   const navigate = useNavigate();
   const [showLoginDialog, setShowLoginDialog] = useState(false);
-  // const hasInitialized = useRef(false); // Commented out as it's not being used
   const [showScoreNotification, setShowScoreNotification] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState("");
   const [notificationSeverity, setNotificationSeverity] = useState("info");
@@ -88,23 +87,7 @@ const QuizPage = () => {
       navigate("/"); // or wherever you want to redirect
     }
   }, [location.state, navigate]);
-  useEffect(() => {
-    if (!showResult && quizData && quizData.length > 0) {
-      const interval = setInterval(() => {
-        setTimer((prev) => {
-          if (prev <= 1) {
-            handleNext();
-            return 20;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-
-      return () => clearInterval(interval);
-    }
-  }, [currentQuestionIndex, showResult, quizData]);
-
-  const handleNext = () => {
+  const handleNext = React.useCallback(() => {
     if (!quizData || !quizData[currentQuestionIndex]) return;
 
     const question = quizData[currentQuestionIndex];
@@ -156,7 +139,23 @@ const QuizPage = () => {
 
       setShowResult(true);
     }
-  };
+  }, [quizData, currentQuestionIndex, selectedOption, answers, score]);
+
+  useEffect(() => {
+    if (!showResult && quizData) {
+      const interval = setInterval(() => {
+        setTimer((prev) => {
+          if (prev === 1) {
+            handleNext();
+            return 20;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [currentQuestionIndex, showResult, quizData, handleNext]);
+
   if (!quizData) {
     return (
       <Box
